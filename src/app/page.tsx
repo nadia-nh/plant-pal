@@ -302,6 +302,7 @@ function Home() {
             onDeleteFood={deleteFood}
             onSelectFood={setSelectedFood}
             onLogAttempt={setAttemptModal}
+            onMoveToPlate={food => moveFood(food, 'love')}
           />
         </div>
       )}
