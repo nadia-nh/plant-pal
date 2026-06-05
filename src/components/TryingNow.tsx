@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Food, FoodCategory } from '@/lib/types'
-import { ATTEMPT_GOAL } from '@/lib/constants'
+import { ATTEMPT_GOAL, DRAG_CLICK_THRESHOLD } from '@/lib/constants'
 
 interface TryingNowProps {
   exploringFoods: Food[]
@@ -12,12 +12,49 @@ interface TryingNowProps {
   onDeleteFood: (id: string) => void
   onSelectFood: (food: Food) => void
   onLogAttempt: (food: Food) => void
+  onMoveToPlate: (food: Food) => void
 }
 
-export function TryingNow({ exploringFoods, allFoodNames, darkMode, onAddFood, onDeleteFood, onSelectFood, onLogAttempt }: TryingNowProps) {
+export function TryingNow({ exploringFoods, allFoodNames, darkMode, onAddFood, onDeleteFood, onSelectFood, onLogAttempt, onMoveToPlate }: TryingNowProps) {
   const [input, setInput] = useState('')
   const [showAutocomplete, setShowAutocomplete] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{ food: Food; startX: number; startY: number; curX: number; curY: number } | null>(null)
+  const [dragGhost, setDragGhost] = useState<{ x: number; y: number; food: Food } | null>(null)
   const dm = darkMode
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const drag = dragRef.current
+      if (!drag) return
+      drag.curX = e.clientX
+      drag.curY = e.clientY
+      const dist = Math.sqrt((drag.curX - drag.startX) ** 2 + (drag.curY - drag.startY) ** 2)
+      if (dist >= DRAG_CLICK_THRESHOLD) {
+        setDragGhost({ x: e.clientX, y: e.clientY, food: drag.food })
+      }
+    }
+    const onUp = (e: PointerEvent) => {
+      const drag = dragRef.current
+      if (!drag) return
+      const dist = Math.sqrt((drag.curX - drag.startX) ** 2 + (drag.curY - drag.startY) ** 2)
+      if (dist >= DRAG_CLICK_THRESHOLD) {
+        const rect = containerRef.current?.getBoundingClientRect()
+        const insidePanel = rect
+          ? e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
+          : false
+        if (!insidePanel) onMoveToPlate(drag.food)
+      }
+      dragRef.current = null
+      setDragGhost(null)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+  }, [onMoveToPlate])
 
   const filtered = allFoodNames.filter(n =>
     n.toLowerCase().includes(input.toLowerCase()) &&
@@ -28,7 +65,16 @@ export function TryingNow({ exploringFoods, allFoodNames, darkMode, onAddFood, o
   const ringCircumference = 62.8
 
   return (
-    <div className={`w-full lg:w-72 p-4 rounded-3xl shadow-sm border ${dm ? 'bg-gray-800/90 border-gray-700/50' : 'bg-white/90 border-emerald-100/50'} backdrop-blur-sm`}>
+    <>
+      {dragGhost && (
+        <div
+          style={{ position: 'fixed', left: dragGhost.x, top: dragGhost.y, transform: 'translate(-50%, -60%)', pointerEvents: 'none', zIndex: 1000 }}
+          className="bg-white rounded-xl px-3 py-1.5 shadow-xl border border-emerald-300 text-sm font-semibold text-emerald-700 whitespace-nowrap"
+        >
+          {dragGhost.food.name} → 🍽️
+        </div>
+      )}
+    <div ref={containerRef} className={`w-full lg:w-72 p-4 rounded-3xl shadow-sm border ${dm ? 'bg-gray-800/90 border-gray-700/50' : 'bg-white/90 border-emerald-100/50'} backdrop-blur-sm`}>
       <h2 className={`text-base font-bold italic mb-3 ${dm ? 'text-emerald-300' : 'text-emerald-800'}`} style={{ fontFamily: 'var(--font-display)' }}>Trying Now</h2>
 
       {exploringFoods.length === 0 && (
@@ -37,9 +83,17 @@ export function TryingNow({ exploringFoods, allFoodNames, darkMode, onAddFood, o
 
       <ul className="space-y-1 mb-3">
         {exploringFoods.map(food => (
-          <li key={food.id} className={`group flex items-center gap-2 px-2 py-1.5 rounded-xl transition-transform hover:translate-x-1 ${dm ? 'hover:bg-gray-700/50' : 'hover:bg-emerald-50/80'}`}>
+          <li
+            key={food.id}
+            style={{ cursor: dragGhost?.food.id === food.id ? 'grabbing' : 'grab', touchAction: 'none' }}
+            className={`group flex items-center gap-2 px-2 py-1.5 rounded-xl transition-transform hover:translate-x-1 ${dm ? 'hover:bg-gray-700/50' : 'hover:bg-emerald-50/80'} ${dragGhost?.food.id === food.id ? 'opacity-40' : ''}`}
+            onPointerDown={e => {
+              e.preventDefault()
+              dragRef.current = { food, startX: e.clientX, startY: e.clientY, curX: e.clientX, curY: e.clientY }
+            }}
+          >
             <button
-              onClick={() => onSelectFood(food)}
+              onClick={() => { if (!dragGhost) onSelectFood(food) }}
               className={`flex-1 text-left text-sm font-medium truncate ${dm ? 'text-gray-200 hover:text-emerald-400' : 'text-gray-700 hover:text-emerald-700'}`}
             >
               {food.name}
@@ -111,5 +165,6 @@ export function TryingNow({ exploringFoods, allFoodNames, darkMode, onAddFood, o
         )}
       </div>
     </div>
+    </>
   )
 }

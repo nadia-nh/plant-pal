@@ -34,7 +34,7 @@ export function FoodDetailModal({ food, onClose, onMove }: FoodDetailModalProps)
           <h3 id="food-detail-title" className="text-lg font-semibold">{food.name}</h3>
           <div className="flex gap-1">
             {CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => onMove(food, cat)}
+              <button key={cat} onClick={() => { onMove(food, cat); onClose() }}
                 className={`text-xs px-2 py-1 rounded ${food.category === cat ? 'bg-green-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 {cat === 'love' ? '🟢' : cat === 'exploring' ? '🌱' : cat === 'curious' ? '🌿' : '🚫'}
