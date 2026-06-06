@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import { DISMISSED_KEY } from '@/lib/constants'
 import * as db from '@/lib/supabase/db'
 
-export function useDismissedSuggestions(userId: string | null | undefined) {
+export function useDismissedSuggestions(userId: string | null | undefined, onSyncError?: () => void) {
   const [dismissed, setDismissed] = useState<string[]>([])
   const initializedRef = useRef(false)
+  const onSyncErrorRef = useRef(onSyncError)
+  onSyncErrorRef.current = onSyncError
 
   useEffect(() => {
     if (userId === undefined) return
@@ -47,7 +49,7 @@ export function useDismissedSuggestions(userId: string | null | undefined) {
     if (userId === null) {
       localStorage.setItem(DISMISSED_KEY, JSON.stringify(dismissed))
     } else if (userId !== undefined) {
-      db.saveDismissed(userId, dismissed).catch(console.error)
+      db.saveDismissed(userId, dismissed).catch(() => { console.error('sync failed'); onSyncErrorRef.current?.() })
     }
   }, [dismissed, userId])
 

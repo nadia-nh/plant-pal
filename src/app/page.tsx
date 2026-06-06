@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect, Suspense } from 'react'
+import { useRef, useState, useEffect, Suspense, Component, ReactNode } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Leaf, Compass, ChefHat } from 'lucide-react'
 import { Food, FoodCategory, Attempt, DietaryTag } from '@/lib/types'
@@ -36,22 +36,53 @@ const ALL_DIETARY_TAGS: { tag: DietaryTag; label: string }[] = [
   { tag: 'raw-friendly', label: 'Raw-friendly' },
 ]
 
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { error: null }
+  }
+  static getDerivedStateFromError(error: Error) { return { error } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-center">
+          <p className="text-2xl">🌱</p>
+          <p className="text-lg font-medium text-gray-700">Something went wrong</p>
+          <p className="text-sm text-gray-500">Try refreshing the page</p>
+          <button
+            onClick={() => this.setState({ error: null })}
+            className="px-4 py-2 rounded-full bg-emerald-600 text-white text-sm hover:bg-emerald-700"
+          >
+            Try again
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 export default function Page() {
   return (
-    <Suspense>
-      <Home />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense>
+        <Home />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 
 function Home() {
   const { user, loading: authLoading, signIn, signOut } = useAuth()
   const userId = authLoading ? undefined : (user?.id ?? null)
-  const [foods, setFoods] = useFoodsStorage(userId)
+  const [showMessage, setShowMessage] = useState('')
+  const [foods, setFoods] = useFoodsStorage(userId, () => {
+    setShowMessage("Couldn't sync — your data is saved locally")
+    setTimeout(() => setShowMessage(''), 4000)
+  })
   const [dismissedSuggestions, setDismissedSuggestions] = useDismissedSuggestions(userId)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [showMessage, setShowMessage] = useState('')
   const [selectedFood, setSelectedFood] = useState<Food | null>(null)
   const [showProgress, setShowProgress] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
@@ -142,6 +173,13 @@ function Home() {
     URL.revokeObjectURL(url)
   }
 
+  const isValidFood = (f: unknown): f is Food =>
+    typeof f === 'object' && f !== null &&
+    typeof (f as Food).id === 'string' &&
+    typeof (f as Food).name === 'string' && (f as Food).name.trim().length > 0 &&
+    ['love', 'exploring', 'curious', 'notYet'].includes((f as Food).category) &&
+    Array.isArray((f as Food).attemptHistory)
+
   const importData = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -150,8 +188,10 @@ function Home() {
     reader.onload = ev => {
       try {
         const parsed = JSON.parse(ev.target?.result as string)
-        const imported: Food[] = Array.isArray(parsed) ? parsed : parsed.foods
-        if (!Array.isArray(imported)) return
+        const raw: unknown[] = Array.isArray(parsed) ? parsed : parsed.foods
+        if (!Array.isArray(raw) || raw.length > 5000) throw new Error('invalid')
+        const imported = raw.filter(isValidFood)
+        if (imported.length === 0) throw new Error('invalid')
         setFoods(imported)
         setShowMessage('Data imported!')
         setTimeout(() => setShowMessage(''), 2000)

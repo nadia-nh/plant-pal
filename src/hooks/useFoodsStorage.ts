@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Food, FoodCategory, FoodType } from '@/lib/types'
 import { getFoodType } from '@/lib/foods'
-import { STORAGE_KEY, DISMISSED_KEY } from '@/lib/constants'
+import { STORAGE_KEY } from '@/lib/constants'
 import * as db from '@/lib/supabase/db'
 
 const defaultFoods: Food[] = [
@@ -41,11 +41,13 @@ function loadLocalFoods(): Food[] | null {
   }
 }
 
-export function useFoodsStorage(userId: string | null | undefined) {
+export function useFoodsStorage(userId: string | null | undefined, onSyncError?: () => void) {
   const [foods, setFoods] = useState<Food[]>([])
   const initializedRef = useRef(false)
   const foodsRef = useRef<Food[]>(foods)
   foodsRef.current = foods
+  const onSyncErrorRef = useRef(onSyncError)
+  onSyncErrorRef.current = onSyncError
 
   useEffect(() => {
     if (userId === undefined) return
@@ -100,7 +102,7 @@ export function useFoodsStorage(userId: string | null | undefined) {
     if (userId === null) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(foods))
     } else if (userId !== undefined) {
-      db.saveFoods(userId, foods).catch(console.error)
+      db.saveFoods(userId, foods).catch(() => { console.error('sync failed'); onSyncErrorRef.current?.() })
     }
   }, [foods, userId])
 
