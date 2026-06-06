@@ -45,6 +45,16 @@ export function FoodDetailModal({ food, onClose, onMove }: FoodDetailModalProps)
         {suggestion && (
           <>
             <p className="text-sm text-gray-600 mb-3">Similar to: {suggestion.similarTo.join(', ')}</p>
+            {food.category === 'exploring' && (() => {
+              const easyMethod = suggestion.cookingMethods.find(m => m.difficulty === 'easy') ?? suggestion.cookingMethods[0]
+              const tip = easyMethod?.tips[0]
+              if (!tip) return null
+              return (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-3 text-sm text-green-800">
+                  <span className="font-medium">Quick tip:</span> {tip}
+                </div>
+              )
+            })()}
             <h4 className="font-medium text-gray-800 mb-2">Cooking methods:</h4>
             <ul className="space-y-2 mb-4">
               {suggestion.cookingMethods.map((method, i) => (
@@ -54,6 +64,16 @@ export function FoodDetailModal({ food, onClose, onMove }: FoodDetailModalProps)
                     {method.difficulty}
                   </span>
                   <p className="text-gray-600 text-xs mt-0.5">{method.description}</p>
+                  {method.tips.length > 0 && (
+                    <ul className="mt-1.5 space-y-0.5">
+                      {method.tips.map((tip, j) => (
+                        <li key={j} className="text-xs text-gray-500 flex gap-1.5">
+                          <span className="text-green-500 mt-0.5 shrink-0">›</span>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               ))}
             </ul>
