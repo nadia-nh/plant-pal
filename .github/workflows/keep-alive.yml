@@ -11,9 +11,10 @@ jobs:
     steps:
       - name: Ping Supabase
         run: |
-          echo "Testing URL..."
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/health")
-          echo "HTTP status: $STATUS"
-          STATUS2=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/auth/v1/health")
-          echo "Auth health status: $STATUS2"
-          echo "Done"
+          # Any HTTP response (including 401) means the project is up and active
+          if [ "$STATUS" = "000" ]; then
+            echo "Error: could not reach Supabase (connection failed)"
+            exit 1
+          fi
+          echo "Supabase is active (HTTP $STATUS)"
