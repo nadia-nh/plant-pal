@@ -11,6 +11,5 @@ jobs:
     steps:
       - name: Ping Supabase
         run: |
-          curl -sf "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/rest/v1/" \
-            -H "apikey: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" > /dev/null
+          curl -sf "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/health" > /dev/null
           echo "Pinged Supabase successfully"
