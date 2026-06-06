@@ -19,6 +19,8 @@ export const SWIPE_DETECT_THRESHOLD = 30
 export const ATTEMPT_GOAL = 7
 export const STORAGE_KEY = 'flavorfriend-foods'
 export const DISMISSED_KEY = 'flavorfriend-dismissed'
+export const ONBOARDED_KEY = 'flavorfriend-onboarded'
+export const BARRIERS_KEY = 'flavorfriend-barriers'
 
 export const FOOD_TYPES: FoodType[] = ['vegetable', 'grain', 'legume', 'other']
 export const CATEGORIES: FoodCategory[] = ['love', 'exploring', 'curious', 'notYet']

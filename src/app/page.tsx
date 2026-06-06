@@ -17,6 +17,9 @@ import { AttemptModal } from '@/components/AttemptModal'
 import { FoodDetailModal } from '@/components/FoodDetailModal'
 import { StatsModal } from '@/components/StatsModal'
 import { AuthModal } from '@/components/AuthModal'
+import { WelcomeModal } from '@/components/WelcomeModal'
+import { useOnboarding } from '@/hooks/useOnboarding'
+import { BARRIERS_KEY } from '@/lib/constants'
 
 const encouragementMessages = [
   "You're doing great! Every try counts.",
@@ -97,6 +100,7 @@ function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [linkExpired, setLinkExpired] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
+  const { hasSeenOnboarding, completeOnboarding } = useOnboarding()
 
   useEffect(() => {
     if (searchParams.get('auth_error') === 'link_expired') {
@@ -406,6 +410,28 @@ function Home() {
         onClose={() => { setShowAuthModal(false); setLinkExpired(false) }}
         onSignIn={signIn}
         onSignOut={signOut}
+      />
+
+      <WelcomeModal
+        open={hasSeenOnboarding === false && userId !== undefined}
+        onComplete={(selectedFoods, barriers, dietaryTags) => {
+          setFoods(selectedFoods.map((f, i) => ({
+            id: `ob-${i}-${Date.now()}`,
+            name: f.name,
+            category: 'love' as FoodCategory,
+            foodType: f.foodType,
+            attempts: 0,
+            lastAttempted: null,
+            notes: '',
+            methodUsed: '',
+            attemptHistory: [],
+          })))
+          if (dietaryTags.length > 0) setActiveTags(dietaryTags)
+          if (barriers.length > 0) localStorage.setItem(BARRIERS_KEY, JSON.stringify(barriers))
+          completeOnboarding()
+          setActiveTab('discover')
+        }}
+        onSkip={completeOnboarding}
       />
 
       <nav className={`fixed bottom-0 left-0 right-0 z-40 flex border-t pb-safe ${dm ? 'bg-gray-900/90 backdrop-blur-md border-gray-800' : 'bg-white/90 backdrop-blur-md border-gray-100'}`}>
