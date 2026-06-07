@@ -6,11 +6,13 @@ import { getSuggestionsForFood } from '@/lib/foods'
 
 interface AttemptModalProps {
   food: Food | null
+  editingAttempt?: Attempt | null
   onClose: () => void
   onSubmit: (foodId: string, attempt: Attempt) => void
+  onSaveEdit?: (foodId: string, attemptId: string, updates: { method: string; liked: boolean | null; notes: string }) => void
 }
 
-export function AttemptModal({ food, onClose, onSubmit }: AttemptModalProps) {
+export function AttemptModal({ food, editingAttempt, onClose, onSubmit, onSaveEdit }: AttemptModalProps) {
   const [method, setMethod] = useState('')
   const [liked, setLiked] = useState<boolean | null>(null)
   const [notes, setNotes] = useState('')
@@ -22,16 +24,26 @@ export function AttemptModal({ food, onClose, onSubmit }: AttemptModalProps) {
 
   useEffect(() => {
     if (food) {
-      const suggestion = getSuggestionsForFood(food.name)
-      setMethod(suggestion?.cookingMethods[0]?.name || 'Plain')
-      setLiked(null)
-      setNotes('')
+      if (editingAttempt) {
+        setMethod(editingAttempt.method)
+        setLiked(editingAttempt.liked)
+        setNotes(editingAttempt.notes)
+      } else {
+        const suggestion = getSuggestionsForFood(food.name)
+        setMethod(suggestion?.cookingMethods[0]?.name || 'Plain')
+        setLiked(null)
+        setNotes('')
+      }
     }
-  }, [food])
+  }, [food, editingAttempt])
 
   if (!food) return null
 
   const handleSubmit = () => {
+    if (editingAttempt) {
+      onSaveEdit?.(food.id, editingAttempt.id, { method, liked, notes })
+      return
+    }
     const attempt: Attempt = {
       id: Date.now().toString(),
       date: new Date().toISOString().split('T')[0],
@@ -49,7 +61,7 @@ export function AttemptModal({ food, onClose, onSubmit }: AttemptModalProps) {
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="attempt-modal-title" tabIndex={-1}
         className="bg-white rounded-2xl p-4 max-w-sm w-full focus:outline-none"
       >
-        <h3 id="attempt-modal-title" className="font-semibold text-lg mb-4">Log attempt: {food.name}</h3>
+        <h3 id="attempt-modal-title" className="font-semibold text-lg mb-4">{editingAttempt ? 'Edit attempt' : 'Log attempt'}: {food.name}</h3>
         <div className="mb-3">
           <label htmlFor="attempt-method" className="block text-sm font-medium text-gray-700 mb-1">How did you try it?</label>
           <input id="attempt-method" type="text" value={method} onChange={e => setMethod(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-xl" />
@@ -68,7 +80,7 @@ export function AttemptModal({ food, onClose, onSubmit }: AttemptModalProps) {
         </div>
         <div className="flex gap-2">
           <button onClick={onClose} className="flex-1 py-2 border border-gray-300 rounded-xl text-gray-600">Cancel</button>
-          <button onClick={handleSubmit} className="flex-1 py-2 bg-green-800 text-white rounded-xl">Save</button>
+          <button onClick={handleSubmit} className="flex-1 py-2 bg-green-800 text-white rounded-xl">{editingAttempt ? 'Save changes' : 'Save'}</button>
         </div>
       </div>
     </div>

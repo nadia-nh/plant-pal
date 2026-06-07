@@ -92,6 +92,7 @@ function Home() {
   const [darkMode, setDarkMode] = useState(false)
   const [movedToSafe, setMovedToSafe] = useState<string[]>([])
   const [attemptModal, setAttemptModal] = useState<Food | null>(null)
+  const [editAttemptTarget, setEditAttemptTarget] = useState<{ food: Food; attempt: Attempt } | null>(null)
   const [sessionSkipped, setSessionSkipped] = useState<string[]>([])
   const [recipeFilter, setRecipeFilter] = useState('all')
   const [activeTab, setActiveTab] = useState<'home' | 'discover' | 'recipes'>('home')
@@ -166,6 +167,25 @@ function Home() {
         : f
     ))
     setAttemptModal(null)
+  }
+
+  const handleAttemptEdit = (foodId: string, attemptId: string, updates: { method: string; liked: boolean | null; notes: string }) => {
+    setFoods(prev => prev.map(f => {
+      if (f.id !== foodId) return f
+      const attemptHistory = f.attemptHistory.map(a => a.id === attemptId ? { ...a, ...updates } : a)
+      const latest = attemptHistory[attemptHistory.length - 1]
+      return { ...f, attemptHistory, methodUsed: latest?.method ?? f.methodUsed }
+    }))
+    setEditAttemptTarget(null)
+  }
+
+  const handleAttemptDelete = (foodId: string, attemptId: string) => {
+    setFoods(prev => prev.map(f => {
+      if (f.id !== foodId) return f
+      const attemptHistory = f.attemptHistory.filter(a => a.id !== attemptId)
+      const latest = attemptHistory[attemptHistory.length - 1]
+      return { ...f, attemptHistory, attempts: attemptHistory.length, lastAttempted: latest?.date ?? null, methodUsed: latest?.method ?? '' }
+    }))
   }
 
   const exportData = () => {
@@ -246,6 +266,9 @@ function Home() {
   const searchResults = searchQuery.trim()
     ? foods.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : []
+
+  // Keep the open detail modal in sync with live food data (e.g. after editing/deleting an attempt)
+  const detailFood = selectedFood ? (foods.find(f => f.id === selectedFood.id) ?? selectedFood) : null
 
   const dm = darkMode
 
@@ -392,15 +415,19 @@ function Home() {
       )}
 
       <FoodDetailModal
-        food={selectedFood}
+        food={detailFood}
         onClose={() => setSelectedFood(null)}
         onMove={moveFood}
+        onEditAttempt={(food, attempt) => setEditAttemptTarget({ food, attempt })}
+        onDeleteAttempt={handleAttemptDelete}
       />
 
       <AttemptModal
-        food={attemptModal}
-        onClose={() => setAttemptModal(null)}
+        food={attemptModal ?? editAttemptTarget?.food ?? null}
+        editingAttempt={editAttemptTarget?.attempt ?? null}
+        onClose={() => { setAttemptModal(null); setEditAttemptTarget(null) }}
         onSubmit={handleAttemptSubmit}
+        onSaveEdit={handleAttemptEdit}
       />
 
       <StatsModal
