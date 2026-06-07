@@ -18,6 +18,7 @@ import { FoodDetailModal } from '@/components/FoodDetailModal'
 import { StatsModal } from '@/components/StatsModal'
 import { AuthModal } from '@/components/AuthModal'
 import { WelcomeModal } from '@/components/WelcomeModal'
+import { JourneyStats } from '@/components/JourneyStats'
 import { useOnboarding } from '@/hooks/useOnboarding'
 import { BARRIERS_KEY } from '@/lib/constants'
 
@@ -329,26 +330,33 @@ function Home() {
       )}
 
       {activeTab === 'home' && (
-        <div className="flex flex-col lg:flex-row gap-6 max-w-5xl mx-auto px-4 mb-4 mt-2">
-          <Plate
-            loveFoods={loveFoods}
+        <>
+          <div className="flex flex-col lg:flex-row gap-6 max-w-5xl mx-auto px-4 mb-4 mt-2">
+            <Plate
+              loveFoods={loveFoods}
+              darkMode={darkMode}
+              onAddFood={addOrMoveFood}
+              onMoveFood={moveFood}
+              onDeleteFood={deleteFood}
+              onSelectFood={setSelectedFood}
+            />
+            <TryingNow
+              exploringFoods={exploringFoods}
+              allFoodNames={allFoodNames}
+              darkMode={darkMode}
+              onAddFood={addOrMoveFood}
+              onDeleteFood={deleteFood}
+              onSelectFood={setSelectedFood}
+              onLogAttempt={setAttemptModal}
+              onMoveToPlate={food => moveFood(food, 'love')}
+            />
+          </div>
+          <JourneyStats
+            foods={foods}
             darkMode={darkMode}
-            onAddFood={addOrMoveFood}
-            onMoveFood={moveFood}
-            onDeleteFood={deleteFood}
-            onSelectFood={setSelectedFood}
+            onOpenStats={() => setShowProgress(true)}
           />
-          <TryingNow
-            exploringFoods={exploringFoods}
-            allFoodNames={allFoodNames}
-            darkMode={darkMode}
-            onAddFood={addOrMoveFood}
-            onDeleteFood={deleteFood}
-            onSelectFood={setSelectedFood}
-            onLogAttempt={setAttemptModal}
-            onMoveToPlate={food => moveFood(food, 'love')}
-          />
-        </div>
+        </>
       )}
 
       {activeTab === 'discover' && (
