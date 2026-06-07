@@ -68,11 +68,12 @@ type ImgFallback = 'spoonacular' | 'fooddata' | 'parentimage' | 'flickr' | 'emoj
 interface SuggestionCardProps {
   currentSuggestion: string | undefined
   darkMode: boolean
+  hint?: string | null
   onAdd: (category: FoodCategory) => void
   onSkip: () => void
 }
 
-export function SuggestionCard({ currentSuggestion, darkMode, onAdd, onSkip }: SuggestionCardProps) {
+export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSkip }: SuggestionCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const cardInnerRef = useRef<HTMLDivElement>(null)
   const cardDragRef = useRef<{ startX: number; deltaX: number } | null>(null)
@@ -186,6 +187,11 @@ export function SuggestionCard({ currentSuggestion, darkMode, onAdd, onSkip }: S
             {suggestionData && (
               <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-green-900/90 text-white text-xs font-semibold px-2 py-1 rounded-full leading-none">
                 <FoodTypeIcon name={FOOD_TYPE_CONFIG[suggestionData.foodType].iconName} className="w-3.5 h-3.5" />{FOOD_TYPE_CONFIG[suggestionData.foodType].label}
+              </span>
+            )}
+            {hint && (
+              <span className="absolute top-2 right-2 inline-flex items-center gap-1 bg-amber-500/90 text-white text-xs font-semibold px-2 py-1 rounded-full leading-none">
+                {hint}
               </span>
             )}
             <span className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-xl drop-shadow-lg px-4">

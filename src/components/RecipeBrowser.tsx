@@ -6,11 +6,13 @@ interface RecipeBrowserProps {
   darkMode: boolean
   recipeFilter: string
   onFilterChange: (cat: string) => void
+  barriers?: string[]
 }
 
-export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange }: RecipeBrowserProps) {
+export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers = [] }: RecipeBrowserProps) {
   const dm = darkMode
   const recipeCategories = ['all', ...Array.from(new Set(recipes.map(r => r.category)))]
+  const showQuickHint = barriers.some(b => ['time', 'cost', 'overwhelm'].includes(b))
 
   return (
     <section className="max-w-6xl mx-auto px-4 pb-8">
@@ -18,7 +20,15 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange }: Recipe
         Recipes
       </h2>
       <p className={`text-sm mb-4 ${dm ? 'text-gray-500' : 'text-stone-400'}`}>{recipes.length} plant-based recipes</p>
-      <div className="flex flex-wrap gap-1.5 mb-6">
+      <div className="flex flex-wrap items-center gap-1.5 mb-6">
+        <button onClick={() => onFilterChange('quick')}
+          className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs font-medium ${recipeFilter === 'quick' ? 'bg-amber-500 text-white' : dm ? 'bg-amber-900/40 text-amber-300 hover:bg-amber-900/60' : 'bg-amber-100 text-amber-800 hover:bg-amber-200'}`}
+        >
+          ⚡ Quick &amp; easy
+        </button>
+        {showQuickHint && (
+          <span className={`text-[11px] italic ${dm ? 'text-amber-300/80' : 'text-amber-700/80'}`}>✨ Picked for you</span>
+        )}
         {recipeCategories.map(cat => (
           <button key={cat} onClick={() => onFilterChange(cat)}
             className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs ${recipeFilter === cat ? 'bg-green-900 text-white' : dm ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-stone-100 text-gray-700 hover:bg-stone-200'}`}
@@ -28,7 +38,7 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange }: Recipe
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {recipes.filter(r => recipeFilter === 'all' || r.category === recipeFilter).map((recipe, idx) => (
+        {recipes.filter(r => recipeFilter === 'all' || (recipeFilter === 'quick' ? r.difficulty === 'easy' : r.category === recipeFilter)).map((recipe, idx) => (
           <a
             key={idx}
             href={recipe.link}
