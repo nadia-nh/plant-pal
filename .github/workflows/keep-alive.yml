@@ -11,10 +11,13 @@ jobs:
     steps:
       - name: Ping Supabase
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/health")
-          # Any HTTP response (including 401) means the project is up and active
-          if [ "$STATUS" = "000" ]; then
-            echo "Error: could not reach Supabase (connection failed)"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/rest/v1/foods?select=id&limit=1" \
+            -H "apikey: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}")
+          # A 2xx response means the query reached the database and counts as activity
+          if [ "${STATUS:0:1}" != "2" ]; then
+            echo "Error: Supabase query failed (HTTP $STATUS)"
             exit 1
           fi
-          echo "Supabase is active (HTTP $STATUS)"
+          echo "Supabase database query succeeded (HTTP $STATUS)"
