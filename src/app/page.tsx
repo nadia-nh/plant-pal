@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, Suspense, Component, ReactNode } from 'rea
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Leaf, Compass, ChefHat } from 'lucide-react'
 import { Food, FoodCategory, Attempt, DietaryTag } from '@/lib/types'
-import { getSimilarFoods, getSimilarFoodsFallback, getAllSuggestedFoods, getFoodType, getTagsForFood } from '@/lib/foods'
+import { getSimilarFoods, getSimilarFoodsFallback, getAllSuggestedFoods, getFoodType, getTagsForFood, getSuggestionsForFood } from '@/lib/foods'
 import { ATTEMPT_GOAL } from '@/lib/constants'
 import { useFoodsStorage } from '@/hooks/useFoodsStorage'
 import { useDismissedSuggestions } from '@/hooks/useDismissedSuggestions'
@@ -101,6 +101,9 @@ function Home() {
   const [showOptionsMenu, setShowOptionsMenu] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [linkExpired, setLinkExpired] = useState(false)
+  const [barriers] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(BARRIERS_KEY) || '[]') } catch { return [] }
+  })
   const importRef = useRef<HTMLInputElement>(null)
   const { hasSeenOnboarding, completeOnboarding } = useOnboarding()
 
@@ -244,13 +247,22 @@ function Home() {
   const matchesDiet = (s: string) =>
     activeTags.length === 0 || activeTags.every(t => getTagsForFood(s).includes(t))
 
+  const isGentleStart = (name: string) =>
+    getSuggestionsForFood(name)?.cookingMethods.some(m => m.difficulty === 'easy') ?? false
+  const prefersGentleStart = barriers.some(b => ['overwhelm', 'unknown', 'time'].includes(b))
+  const sortGentleFirst = (list: string[]) =>
+    prefersGentleStart ? [...list].sort((a, b) => Number(isGentleStart(b)) - Number(isGentleStart(a))) : list
+
   const allSuggested = getSimilarFoods(safeFoodNames)
-  const availableSuggestions = allSuggested.filter(s => isAvailable(s) && matchesDiet(s))
+  const availableSuggestions = sortGentleFirst(allSuggested.filter(s => isAvailable(s) && matchesDiet(s)))
   const fallbackSuggestions = availableSuggestions.length === 0
-    ? getSimilarFoodsFallback(safeFoodNames, allFoodNames).filter(s => isAvailable(s) && matchesDiet(s))
+    ? sortGentleFirst(getSimilarFoodsFallback(safeFoodNames, allFoodNames).filter(s => isAvailable(s) && matchesDiet(s)))
     : []
   const allSuggestions = availableSuggestions.length > 0 ? availableSuggestions : fallbackSuggestions
   const currentSuggestion = allSuggestions[0] as string | undefined
+  const personalizedHint = currentSuggestion && barriers.length && isGentleStart(currentSuggestion)
+    ? '🌱 Easy first step'
+    : null
 
   const handleAddSuggestion = (category: FoodCategory) => {
     if (currentSuggestion) {
@@ -400,6 +412,7 @@ function Home() {
           <SuggestionCard
             currentSuggestion={currentSuggestion}
             darkMode={darkMode}
+            hint={personalizedHint}
             onAdd={handleAddSuggestion}
             onSkip={handleSkipSuggestion}
           />
@@ -411,6 +424,7 @@ function Home() {
           darkMode={darkMode}
           recipeFilter={recipeFilter}
           onFilterChange={setRecipeFilter}
+          barriers={barriers}
         />
       )}
 
