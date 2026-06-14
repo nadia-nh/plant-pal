@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Food, FoodCategory } from '@/lib/types'
+import { Food, FoodCategory, Attempt } from '@/lib/types'
 import { CATEGORIES } from '@/lib/constants'
 import { getSuggestionsForFood } from '@/lib/foods'
 
@@ -9,9 +9,11 @@ interface FoodDetailModalProps {
   food: Food | null
   onClose: () => void
   onMove: (food: Food, cat: FoodCategory) => void
+  onEditAttempt: (food: Food, attempt: Attempt) => void
+  onDeleteAttempt: (foodId: string, attemptId: string) => void
 }
 
-export function FoodDetailModal({ food, onClose, onMove }: FoodDetailModalProps) {
+export function FoodDetailModal({ food, onClose, onMove, onEditAttempt, onDeleteAttempt }: FoodDetailModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -90,11 +92,29 @@ export function FoodDetailModal({ food, onClose, onMove }: FoodDetailModalProps)
             <h4 className="font-medium text-gray-800 mb-2">Your attempts:</h4>
             <ul className="space-y-1 mb-4">
               {[...food.attemptHistory].reverse().map(attempt => (
-                <li key={attempt.id} className="text-xs bg-gray-50 p-2 rounded">
-                  <span className="text-gray-500">{attempt.date}</span> — {attempt.method}
-                  {attempt.liked === true  && <span className="text-green-600 ml-1">✓</span>}
-                  {attempt.liked === false && <span className="text-red-500 ml-1">✕</span>}
-                  {attempt.notes && <span className="text-gray-500 ml-1">· {attempt.notes}</span>}
+                <li key={attempt.id} className="text-xs bg-gray-50 p-2 rounded flex items-start gap-1.5 group">
+                  <span className="flex-1 min-w-0">
+                    <span className="text-gray-500">{attempt.date}</span> — {attempt.method}
+                    {attempt.liked === true  && <span className="text-green-600 ml-1">✓</span>}
+                    {attempt.liked === false && <span className="text-red-500 ml-1">✕</span>}
+                    {attempt.notes && <span className="text-gray-500 ml-1">· {attempt.notes}</span>}
+                  </span>
+                  <span className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => onEditAttempt(food, attempt)}
+                      aria-label={`Edit attempt from ${attempt.date}`}
+                      className="text-gray-400 hover:text-green-600 px-0.5"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      onClick={() => onDeleteAttempt(food.id, attempt.id)}
+                      aria-label={`Delete attempt from ${attempt.date}`}
+                      className="text-gray-400 hover:text-red-500 px-0.5"
+                    >
+                      ✕
+                    </button>
+                  </span>
                 </li>
               ))}
             </ul>
