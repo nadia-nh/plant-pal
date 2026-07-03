@@ -26,12 +26,35 @@ export const FOOD_TYPES: FoodType[] = ['vegetable', 'grain', 'legume', 'other']
 export const CATEGORIES: FoodCategory[] = ['love', 'exploring', 'curious', 'notYet']
 
 export const FOOD_TYPE_CONFIG: Record<FoodType, {
-  label: string; iconName: string; fill: string; stroke: string; textColor: string; startDeg: number; endDeg: number
+  label: string; iconName: string
+  fill: string; stroke: string; textColor: string
+  fillDark: string; strokeDark: string; textColorDark: string
+  startDeg: number; endDeg: number
 }> = {
-  vegetable: { label: 'Vegetables', iconName: 'Leaf',  fill: '#dce7d5', stroke: '#5f7a4f', textColor: '#364a2e', startDeg: 180, endDeg: 270 },
-  grain:     { label: 'Grains',     iconName: 'Wheat', fill: '#f3e5c8', stroke: '#a3803c', textColor: '#6b5320', startDeg: 270, endDeg: 360 },
-  legume:    { label: 'Legumes',    iconName: 'Bean',  fill: '#f0d9c8', stroke: '#ad6b46', textColor: '#6e4028', startDeg: 0,   endDeg: 90  },
-  other:     { label: 'Other',      iconName: 'Nut',   fill: '#d5e3dd', stroke: '#4e7d6c', textColor: '#2f4d42', startDeg: 90,  endDeg: 180 },
+  vegetable: {
+    label: 'Vegetables', iconName: 'Carrot',
+    fill: '#c8dfb0', stroke: '#4f7c33', textColor: '#2f4d1b',
+    fillDark: '#43592b', strokeDark: '#adcc85', textColorDark: '#d9e9c4',
+    startDeg: 180, endDeg: 270,
+  },
+  grain: {
+    label: 'Grains', iconName: 'Wheat',
+    fill: '#f0dc9e', stroke: '#a2781f', textColor: '#63480f',
+    fillDark: '#5f4b1d', strokeDark: '#dbae51', textColorDark: '#efddaa',
+    startDeg: 270, endDeg: 360,
+  },
+  legume: {
+    label: 'Legumes', iconName: 'PeaPod',
+    fill: '#eecca5', stroke: '#ac5c28', textColor: '#6b3813',
+    fillDark: '#603a20', strokeDark: '#d88e56', textColorDark: '#f1d4b5',
+    startDeg: 0, endDeg: 90,
+  },
+  other: {
+    label: 'Other', iconName: 'Acorn',
+    fill: '#bcdccb', stroke: '#33755a', textColor: '#1f4936',
+    fillDark: '#2f4a3c', strokeDark: '#83b79b', textColorDark: '#cfe3d7',
+    startDeg: 90, endDeg: 180,
+  },
 }
 
 // Shared progress-ring colors (SVG strokes can't use Tailwind classes)

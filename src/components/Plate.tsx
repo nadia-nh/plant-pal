@@ -139,7 +139,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           fill={plateDragGhost?.outside ? '#fca5a5' : 'url(#rimGrad)'}
           filter={plateDragGhost?.outside ? undefined : 'url(#plateShadow)'}
         />
-        {!plateDragGhost?.outside && (() => {
+        {!dm && !plateDragGhost?.outside && (() => {
           const hStart = polarToXY(PLATE_CX, PLATE_CY, PLATE_R + 10, 210)
           const hEnd   = polarToXY(PLATE_CX, PLATE_CY, PLATE_R + 10, 300)
           return (
@@ -160,13 +160,13 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           const labelPos = polarToXY(PLATE_CX, PLATE_CY, 242, midAngle)
           return (
             <g key={ft}>
-              <path d={makeSectorPath(PLATE_CX, PLATE_CY, PLATE_R, PLATE_INNER_R, cfg.startDeg, cfg.endDeg)} fill={cfg.fill} stroke={dm ? 'rgba(255,255,255,0.05)' : 'white'} strokeWidth="2.5" strokeOpacity="0.9" />
+              <path d={makeSectorPath(PLATE_CX, PLATE_CY, PLATE_R, PLATE_INNER_R, cfg.startDeg, cfg.endDeg)} fill={dm ? cfg.fillDark : cfg.fill} stroke={dm ? 'rgba(0,0,0,0.35)' : 'white'} strokeWidth="2.5" strokeOpacity="0.9" />
               <foreignObject x={labelPos.x - 12} y={labelPos.y - 21} width={24} height={24}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                  <FoodTypeIcon name={cfg.iconName} className="w-5 h-5" style={{ color: cfg.stroke }} />
+                  <FoodTypeIcon name={cfg.iconName} className="w-5 h-5" style={{ color: dm ? cfg.strokeDark : cfg.stroke }} />
                 </div>
               </foreignObject>
-              <text x={labelPos.x} y={labelPos.y + 13} textAnchor="middle" dominantBaseline="central" fontSize="14" fontWeight="700" fill={dm ? cfg.fill : cfg.textColor} fontFamily="system-ui, sans-serif">
+              <text x={labelPos.x} y={labelPos.y + 13} textAnchor="middle" dominantBaseline="central" fontSize="14" fontWeight="700" fill={dm ? cfg.textColorDark : cfg.textColor} fontFamily="system-ui, sans-serif">
                 {cfg.label}
               </text>
               {sectorFoods.map((food, i) => {
@@ -194,11 +194,11 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
                   >
                     <foreignObject x={pos.x - 12} y={pos.y - 12} width={24} height={24}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <FoodTypeIcon name={cfg.iconName} className="w-4 h-4" style={{ color: cfg.stroke }} />
+                        <FoodTypeIcon name={cfg.iconName} className="w-4 h-4" style={{ color: dm ? cfg.strokeDark : cfg.stroke }} />
                       </div>
                     </foreignObject>
                     <rect x={pos.x - 30} y={pos.y + 11} width={60} height={18} rx={9} fill={dm ? 'rgba(41, 37, 36, 0.75)' : 'rgba(255, 255, 255, 0.75)'} />
-                    <text x={pos.x} y={pos.y + 20} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill={dm ? cfg.fill : cfg.textColor} fontWeight="700" fontFamily="system-ui, sans-serif">
+                    <text x={pos.x} y={pos.y + 20} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill={dm ? cfg.textColorDark : cfg.textColor} fontWeight="700" fontFamily="system-ui, sans-serif">
                       {food.name.length <= 10 ? food.name : food.name.slice(0, 9) + '…'}
                     </text>
                     <title>{food.name}</title>
@@ -223,7 +223,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
               <circle cx={plateDragGhost.svgX} cy={plateDragGhost.svgY} r={16} fill={dm ? 'rgba(41, 37, 36, 0.9)' : 'rgba(255, 255, 255, 0.9)'} />
               <foreignObject x={plateDragGhost.svgX - 12} y={plateDragGhost.svgY - 12} width={24} height={24}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                  <FoodTypeIcon name={cfg2.iconName} className="w-5 h-5" style={{ color: cfg2.stroke }} />
+                  <FoodTypeIcon name={cfg2.iconName} className="w-5 h-5" style={{ color: dm ? cfg2.strokeDark : cfg2.stroke }} />
                 </div>
               </foreignObject>
               {plateDragGhost.outside && (
