@@ -1,9 +1,17 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { Heart, Sprout, Sparkles, Ban } from 'lucide-react'
 import { Food, FoodCategory, Attempt } from '@/lib/types'
 import { CATEGORIES } from '@/lib/constants'
 import { getSuggestionsForFood } from '@/lib/foods'
+
+const CATEGORY_META: Record<FoodCategory, { label: string; Icon: typeof Heart }> = {
+  love:      { label: 'Loved',     Icon: Heart },
+  exploring: { label: 'Exploring', Icon: Sprout },
+  curious:   { label: 'Curious',   Icon: Sparkles },
+  notYet:    { label: 'Not yet',   Icon: Ban },
+}
 
 interface FoodDetailModalProps {
   food: Food | null
@@ -37,13 +45,18 @@ export function FoodDetailModal({ food, darkMode, onClose, onMove, onEditAttempt
         <div className="flex justify-between items-start mb-4">
           <h3 id="food-detail-title" className={`text-lg font-semibold ${dm ? 'text-stone-200' : 'text-stone-800'}`}>{food.name}</h3>
           <div className="flex gap-1">
-            {CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => { onMove(food, cat); onClose() }}
-                className={`text-xs px-2 py-1 rounded ${food.category === cat ? 'bg-green-800 text-white' : (dm ? 'bg-stone-700 text-stone-300 hover:bg-stone-600' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}`}
-              >
-                {cat === 'love' ? '🟢' : cat === 'exploring' ? '🌱' : cat === 'curious' ? '🌿' : '🚫'}
-              </button>
-            ))}
+            {CATEGORIES.map(cat => {
+              const { label, Icon } = CATEGORY_META[cat]
+              return (
+                <button key={cat} onClick={() => { onMove(food, cat); onClose() }}
+                  aria-label={label}
+                  title={label}
+                  className={`p-1.5 rounded-lg ${food.category === cat ? 'bg-green-800 text-white' : (dm ? 'bg-stone-700 text-stone-300 hover:bg-stone-600' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </button>
+              )
+            })}
           </div>
         </div>
         {suggestion && (

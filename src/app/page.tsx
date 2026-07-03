@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, Suspense, Component, ReactNode } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Leaf, Compass, ChefHat } from 'lucide-react'
+import { Leaf, Compass, ChefHat, Moon, Sun, Download, Upload, BarChart3, User, LogIn } from 'lucide-react'
 import { Food, FoodCategory, Attempt, DietaryTag } from '@/lib/types'
 import { getSimilarFoods, getSimilarFoodsFallback, getAllSuggestedFoods, getFoodType, getTagsForFood, getSuggestionsForFood } from '@/lib/foods'
 import { ATTEMPT_GOAL } from '@/lib/constants'
@@ -303,21 +303,26 @@ function Home() {
                 <div className="fixed inset-0 z-40" onClick={() => setShowOptionsMenu(false)} />
                 <div className={`absolute right-0 top-full mt-1 rounded-xl shadow-xl z-50 py-1 min-w-40 border ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}>
                   <button onClick={() => { setDarkMode(!dm); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
-                    {dm ? '☀️ Light mode' : '🌙 Dark mode'}
+                    {dm ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
+                    {dm ? 'Light mode' : 'Dark mode'}
                   </button>
                   <button onClick={() => { exportData(); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
-                    ↓ Export backup
+                    <Download className="w-4 h-4 shrink-0" />
+                    Export backup
                   </button>
                   <label className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 cursor-pointer ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
-                    ↑ Import backup
+                    <Upload className="w-4 h-4 shrink-0" />
+                    Import backup
                     <input ref={importRef} type="file" accept="application/json" className="sr-only" onChange={e => { importData(e); setShowOptionsMenu(false) }} />
                   </label>
                   <button onClick={() => { setShowProgress(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
-                    📊 Stats
+                    <BarChart3 className="w-4 h-4 shrink-0" />
+                    Stats
                   </button>
                   <div className={`border-t my-1 ${dm ? 'border-stone-700' : 'border-stone-200'}`} />
                   <button onClick={() => { setShowAuthModal(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
-                    {user ? `👤 Account` : '🔑 Sign in / Sync'}
+                    {user ? <User className="w-4 h-4 shrink-0" /> : <LogIn className="w-4 h-4 shrink-0" />}
+                    {user ? 'Account' : 'Sign in / Sync'}
                   </button>
                 </div>
               </>
