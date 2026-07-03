@@ -24,14 +24,12 @@ function makeSectorPath(cx: number, cy: number, outerR: number, innerR: number, 
 }
 
 const CHIP_HEIGHT = 20
-const CHIP_ICON = 13
-
 function chipDisplayName(name: string): string {
-  return name.length <= 14 ? name : name.slice(0, 13) + '…'
+  return name.length <= 12 ? name : name.slice(0, 11) + '…'
 }
 
 function chipWidth(name: string): number {
-  return 6 + CHIP_ICON + 4 + chipDisplayName(name).length * 5.6 + 8
+  return 18 + chipDisplayName(name).length * 5.6
 }
 
 // Slide a chip horizontally so it stays between the plate rim and the
@@ -218,12 +216,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
                     }}
                   >
                     <rect x={pos.x - w / 2} y={pos.y - CHIP_HEIGHT / 2} width={w} height={CHIP_HEIGHT} rx={CHIP_HEIGHT / 2} fill={dm ? 'rgba(28, 25, 23, 0.85)' : 'rgba(255, 255, 255, 0.88)'} stroke={dm ? cfg.strokeDark : cfg.stroke} strokeOpacity="0.3" />
-                    <foreignObject x={pos.x - w / 2 + 6} y={pos.y - CHIP_ICON / 2} width={CHIP_ICON} height={CHIP_ICON}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <FoodTypeIcon name={cfg.iconName} className="w-full h-full" style={{ color: dm ? cfg.strokeDark : cfg.stroke }} />
-                      </div>
-                    </foreignObject>
-                    <text x={pos.x - w / 2 + 6 + CHIP_ICON + 4} y={pos.y} textAnchor="start" dominantBaseline="central" fontSize="10" fill={dm ? cfg.textColorDark : cfg.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
+                    <text x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="central" fontSize="10" fill={dm ? cfg.textColorDark : cfg.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
                       {chipDisplayName(food.name)}
                     </text>
                     <title>{food.name}</title>
@@ -250,12 +243,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           return (
             <g style={{ pointerEvents: 'none' }} opacity="0.95" filter="url(#ghostShadow)" transform={`translate(${gx}, ${gy}) scale(1.15) translate(${-gx}, ${-gy})`}>
               <rect x={gx - gw / 2} y={gy - CHIP_HEIGHT / 2} width={gw} height={CHIP_HEIGHT} rx={CHIP_HEIGHT / 2} fill={dm ? 'rgba(28, 25, 23, 0.9)' : 'rgba(255, 255, 255, 0.9)'} stroke={dm ? cfg2.strokeDark : cfg2.stroke} strokeOpacity="0.3" />
-              <foreignObject x={gx - gw / 2 + 6} y={gy - CHIP_ICON / 2} width={CHIP_ICON} height={CHIP_ICON}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                  <FoodTypeIcon name={cfg2.iconName} className="w-full h-full" style={{ color: dm ? cfg2.strokeDark : cfg2.stroke }} />
-                </div>
-              </foreignObject>
-              <text x={gx - gw / 2 + 6 + CHIP_ICON + 4} y={gy} textAnchor="start" dominantBaseline="central" fontSize="10" fill={dm ? cfg2.textColorDark : cfg2.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
+              <text x={gx} y={gy} textAnchor="middle" dominantBaseline="central" fontSize="10" fill={dm ? cfg2.textColorDark : cfg2.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
                 {chipDisplayName(ghostName)}
               </text>
               {plateDragGhost.outside && (
@@ -326,7 +314,14 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
             style={{ left: Math.min(platePopover.x, window.innerWidth - 184), top: Math.min(platePopover.y - 8, window.innerHeight - 140) }}
             onClick={e => e.stopPropagation()}
           >
-            <p className={`text-sm font-semibold mb-2 truncate ${dm ? 'text-stone-200' : 'text-stone-800'}`}>{platePopover.food.name}</p>
+            <p className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${dm ? 'text-stone-200' : 'text-stone-800'}`}>
+              <FoodTypeIcon
+                name={FOOD_TYPE_CONFIG[platePopover.food.foodType].iconName}
+                className="w-4 h-4 shrink-0"
+                style={{ color: dm ? FOOD_TYPE_CONFIG[platePopover.food.foodType].strokeDark : FOOD_TYPE_CONFIG[platePopover.food.foodType].stroke }}
+              />
+              <span className="truncate">{platePopover.food.name}</span>
+            </p>
             <button
               className={`w-full text-left px-3 py-1.5 rounded-xl text-sm mb-1 ${dm ? 'hover:bg-stone-700 text-green-300' : 'hover:bg-stone-50 text-green-800'}`}
               onClick={() => { onMoveFood(platePopover.food, 'exploring'); setPlatePopover(null) }}
