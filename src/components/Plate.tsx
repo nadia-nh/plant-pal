@@ -6,6 +6,7 @@ import {
   PLATE_CX, PLATE_CY, PLATE_R, PLATE_INNER_R, PLATE_RIM_WIDTH,
   DRAG_CLICK_THRESHOLD, FOOD_TYPE_CONFIG, FOOD_TYPES,
 } from '@/lib/constants'
+import { Sprout, Trash2, ArrowRight } from 'lucide-react'
 import { getAllSuggestedFoods } from '@/lib/foods'
 import { FoodTypeIcon } from '@/lib/foodIcons'
 
@@ -306,41 +307,51 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
         <div className="fixed inset-0 z-30" onClick={() => setPlatePopover(null)}
           onKeyDown={e => { if (e.key === 'Escape') setPlatePopover(null) }}
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Options for ${platePopover.food.name}`}
-            className={`absolute rounded-2xl shadow-xl border p-3 w-44 ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}
-            style={{ left: Math.min(platePopover.x, window.innerWidth - 184), top: Math.min(platePopover.y - 8, window.innerHeight - 140) }}
-            onClick={e => e.stopPropagation()}
-          >
-            <p className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${dm ? 'text-stone-200' : 'text-stone-800'}`}>
-              <FoodTypeIcon
-                name={FOOD_TYPE_CONFIG[platePopover.food.foodType].iconName}
-                className="w-4 h-4 shrink-0"
-                style={{ color: dm ? FOOD_TYPE_CONFIG[platePopover.food.foodType].strokeDark : FOOD_TYPE_CONFIG[platePopover.food.foodType].stroke }}
-              />
-              <span className="truncate">{platePopover.food.name}</span>
-            </p>
-            <button
-              className={`w-full text-left px-3 py-1.5 rounded-xl text-sm mb-1 ${dm ? 'hover:bg-stone-700 text-green-300' : 'hover:bg-stone-50 text-green-800'}`}
-              onClick={() => { onMoveFood(platePopover.food, 'exploring'); setPlatePopover(null) }}
-            >
-              🌱 Move to Exploring
-            </button>
-            <button
-              className={`w-full text-left px-3 py-1.5 rounded-xl text-sm mb-1 ${dm ? 'hover:bg-red-900/30 text-red-400' : 'hover:bg-red-50 text-red-600'}`}
-              onClick={() => { onDeleteFood(platePopover.food.id); setPlatePopover(null) }}
-            >
-              🗑️ Remove
-            </button>
-            <button
-              className={`w-full text-left px-3 py-1.5 rounded-xl text-sm ${dm ? 'hover:bg-stone-700 text-stone-400' : 'hover:bg-stone-50 text-stone-600'}`}
-              onClick={() => { onSelectFood(platePopover.food); setPlatePopover(null) }}
-            >
-              Details →
-            </button>
-          </div>
+          {(() => {
+            const pcfg = FOOD_TYPE_CONFIG[platePopover.food.foodType]
+            return (
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Options for ${platePopover.food.name}`}
+                className={`absolute rounded-2xl border w-48 overflow-hidden ${dm ? 'bg-stone-800 border-stone-700 shadow-xl shadow-black/40' : 'bg-white border-stone-200/60 shadow-lg'}`}
+                style={{ left: Math.min(platePopover.x, window.innerWidth - 200), top: Math.min(platePopover.y - 8, window.innerHeight - 160) }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div className={`px-4 pt-3 pb-2.5 border-b ${dm ? 'border-stone-700' : 'border-stone-100'}`}>
+                  <p className={`text-sm font-semibold truncate ${dm ? 'text-stone-200' : 'text-stone-800'}`}>{platePopover.food.name}</p>
+                  <p className="flex items-center gap-1 text-[11px] font-medium mt-0.5" style={{ color: dm ? pcfg.strokeDark : pcfg.stroke }}>
+                    <FoodTypeIcon name={pcfg.iconName} className="w-3.5 h-3.5 shrink-0" />
+                    {pcfg.label}
+                  </p>
+                </div>
+                <div className="p-1.5">
+                  <button
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-sm ${dm ? 'hover:bg-stone-700 text-green-300' : 'hover:bg-stone-50 text-green-800'}`}
+                    onClick={() => { onMoveFood(platePopover.food, 'exploring'); setPlatePopover(null) }}
+                  >
+                    <Sprout className="w-4 h-4 shrink-0" />
+                    Move to Exploring
+                  </button>
+                  <button
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-sm ${dm ? 'hover:bg-red-900/30 text-red-400' : 'hover:bg-red-50 text-red-600'}`}
+                    onClick={() => { onDeleteFood(platePopover.food.id); setPlatePopover(null) }}
+                  >
+                    <Trash2 className="w-4 h-4 shrink-0" />
+                    Remove
+                  </button>
+                  <div className={`border-t my-1 ${dm ? 'border-stone-700' : 'border-stone-100'}`} />
+                  <button
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-sm ${dm ? 'hover:bg-stone-700 text-stone-400' : 'hover:bg-stone-50 text-stone-600'}`}
+                    onClick={() => { onSelectFood(platePopover.food); setPlatePopover(null) }}
+                  >
+                    Details
+                    <ArrowRight className="w-3.5 h-3.5 ml-auto shrink-0" />
+                  </button>
+                </div>
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>
