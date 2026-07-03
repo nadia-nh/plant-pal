@@ -166,7 +166,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
                   <FoodTypeIcon name={cfg.iconName} className="w-5 h-5" style={{ color: dm ? cfg.strokeDark : cfg.stroke }} />
                 </div>
               </foreignObject>
-              <text x={labelPos.x} y={labelPos.y + 13} textAnchor="middle" dominantBaseline="central" fontSize="14" fontWeight="700" fill={dm ? cfg.textColorDark : cfg.textColor} fontFamily="system-ui, sans-serif">
+              <text x={labelPos.x} y={labelPos.y + 13} textAnchor="middle" dominantBaseline="central" fontSize="15" fontWeight="500" fontStyle="italic" fill={dm ? cfg.textColorDark : cfg.textColor} fontFamily="var(--font-display), Georgia, serif">
                 {cfg.label}
               </text>
               {sectorFoods.map((food, i) => {
