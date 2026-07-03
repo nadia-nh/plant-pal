@@ -4,9 +4,9 @@ import { useRef, useState, useEffect } from 'react'
 import { Food, FoodCategory } from '@/lib/types'
 import {
   PLATE_CX, PLATE_CY, PLATE_R, PLATE_INNER_R, PLATE_RIM_WIDTH,
-  FOOD_RING_INNER_R, FOOD_RING_OUTER_R, FOOD_CIRCLE_PAD,
   DRAG_CLICK_THRESHOLD, FOOD_TYPE_CONFIG, FOOD_TYPES,
 } from '@/lib/constants'
+import { Sprout, Trash2, ArrowRight } from 'lucide-react'
 import { getAllSuggestedFoods } from '@/lib/foods'
 import { FoodTypeIcon } from '@/lib/foodIcons'
 
@@ -24,26 +24,48 @@ function makeSectorPath(cx: number, cy: number, outerR: number, innerR: number, 
   return `M ${iS.x} ${iS.y} L ${oS.x} ${oS.y} A ${outerR} ${outerR} 0 ${large} 1 ${oE.x} ${oE.y} L ${iE.x} ${iE.y} A ${innerR} ${innerR} 0 ${large} 0 ${iS.x} ${iS.y} Z`
 }
 
+const CHIP_HEIGHT = 20
+function chipDisplayName(name: string): string {
+  return name.length <= 12 ? name : name.slice(0, 11) + '…'
+}
+
+function chipWidth(name: string): number {
+  return 18 + chipDisplayName(name).length * 5.6
+}
+
+// Slide a chip horizontally so it stays between the plate rim and the
+// vertical sector divider; rows keep their height so chips never pile up
+function clampChipPos(pos: { x: number; y: number }, w: number): { x: number; y: number } {
+  const margin = PLATE_R - 10
+  const dx = pos.x - PLATE_CX
+  const dy = pos.y - PLATE_CY
+  const chord = Math.sqrt(Math.max(margin * margin - dy * dy, 0))
+  const rimMax = chord - w / 2
+  const dividerMin = w / 2 + 4
+  const xAbs = rimMax < dividerMin
+    ? Math.max(rimMax, 0)
+    : Math.min(Math.max(Math.abs(dx), dividerMin), rimMax)
+  return { x: PLATE_CX + Math.sign(dx || 1) * xAbs, y: pos.y }
+}
+
+// Chips stack at evenly spaced heights within their quarter-wedge, centered
+// between the vertical divider and the rim at each height — horizontal
+// capsules read as neat rows and never cross into a neighboring sector
 function getFoodCirclePositions(count: number, startDeg: number, endDeg: number, cx: number, cy: number): Array<{x: number; y: number}> {
   if (count === 0) return []
-  const innerR = FOOD_RING_INNER_R
-  const outerR = FOOD_RING_OUTER_R
-  const usableStart = startDeg + FOOD_CIRCLE_PAD
-  const usableEnd = endDeg - FOOD_CIRCLE_PAD
-  const usableRange = usableEnd - usableStart
-  const maxPerRow = 2
-  const rows = Math.ceil(count / maxPerRow)
-  const rStep = (outerR - innerR) / rows
+  const midRad = (((startDeg + endDeg) / 2) * Math.PI) / 180
+  const signX = Math.cos(midRad) < 0 ? -1 : 1
+  const signY = Math.sin(midRad) < 0 ? -1 : 1
+  const midDy = 102
+  const spacing = 23
+  const half = count === 1 ? 0 : Math.min(47, (spacing * (count - 1)) / 2)
+  const margin = PLATE_R - 10
   const positions: Array<{x: number; y: number}> = []
-  let placed = 0
-  for (let row = 0; row < rows && placed < count; row++) {
-    const r = innerR + rStep * (row + 0.5)
-    const inRow = Math.min(maxPerRow, count - placed)
-    for (let i = 0; i < inRow; i++) {
-      const t = inRow === 1 ? 0.5 : i / (inRow - 1)
-      positions.push(polarToXY(cx, cy, r, usableStart + usableRange * t))
-      placed++
-    }
+  for (let i = 0; i < count; i++) {
+    const t = count === 1 ? 0.5 : i / (count - 1)
+    const absDy = midDy - half + 2 * half * t
+    const chord = Math.sqrt(Math.max(margin * margin - absDy * absDy, 0))
+    positions.push({ x: cx + signX * chord * 0.55, y: cy + signY * absDy })
   }
   return positions
 }
@@ -112,14 +134,14 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
       >
         <defs>
           <radialGradient id="rimGrad" cx="35%" cy="30%" r="70%">
-            <stop offset="0%"   stopColor={dm ? '#4b5563' : '#f8fafc'} />
-            <stop offset="60%"  stopColor={dm ? '#374151' : '#e2e8f0'} />
-            <stop offset="100%" stopColor={dm ? '#1f2937' : '#cbd5e1'} />
+            <stop offset="0%"   stopColor={dm ? '#57534e' : '#fafaf9'} />
+            <stop offset="60%"  stopColor={dm ? '#44403c' : '#e7e5e4'} />
+            <stop offset="100%" stopColor={dm ? '#292524' : '#d6d3d1'} />
           </radialGradient>
           <radialGradient id="plateGrad" cx="40%" cy="40%" r="60%">
-            <stop offset="0%"   stopColor={dm ? '#374151' : '#ffffff'} />
-            <stop offset="80%" stopColor={dm ? '#1f2937' : '#f8fafc'} />
-            <stop offset="100%" stopColor={dm ? '#111827' : '#e2e8f0'} />
+            <stop offset="0%"   stopColor={dm ? '#44403c' : '#ffffff'} />
+            <stop offset="80%" stopColor={dm ? '#292524' : '#fafaf9'} />
+            <stop offset="100%" stopColor={dm ? '#1c1917' : '#e7e5e4'} />
           </radialGradient>
           <radialGradient id="sectorOverlay" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="transparent" />
@@ -127,7 +149,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
             <stop offset="100%" stopColor={dm ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.05)'} />
           </radialGradient>
           <filter id="plateShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="15" stdDeviation="15" floodColor={dm ? '#000000' : '#475569'} floodOpacity="0.25"/>
+            <feDropShadow dx="0" dy="15" stdDeviation="15" floodColor={dm ? '#000000' : '#78716c'} floodOpacity="0.25"/>
           </filter>
           <filter id="ghostShadow">
             <feDropShadow dx="0" dy="8" stdDeviation="6" floodOpacity="0.3" />
@@ -139,7 +161,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           fill={plateDragGhost?.outside ? '#fca5a5' : 'url(#rimGrad)'}
           filter={plateDragGhost?.outside ? undefined : 'url(#plateShadow)'}
         />
-        {!plateDragGhost?.outside && (() => {
+        {!dm && !plateDragGhost?.outside && (() => {
           const hStart = polarToXY(PLATE_CX, PLATE_CY, PLATE_R + 10, 210)
           const hEnd   = polarToXY(PLATE_CX, PLATE_CY, PLATE_R + 10, 300)
           return (
@@ -160,18 +182,20 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           const labelPos = polarToXY(PLATE_CX, PLATE_CY, 242, midAngle)
           return (
             <g key={ft}>
-              <path d={makeSectorPath(PLATE_CX, PLATE_CY, PLATE_R, PLATE_INNER_R, cfg.startDeg, cfg.endDeg)} fill={cfg.fill} stroke={dm ? 'rgba(255,255,255,0.05)' : 'white'} strokeWidth="2.5" strokeOpacity="0.9" />
+              <path d={makeSectorPath(PLATE_CX, PLATE_CY, PLATE_R, PLATE_INNER_R, cfg.startDeg, cfg.endDeg)} fill={dm ? cfg.fillDark : cfg.fill} stroke={dm ? 'rgba(0,0,0,0.35)' : 'white'} strokeWidth="2.5" strokeOpacity="0.9" />
               <foreignObject x={labelPos.x - 12} y={labelPos.y - 21} width={24} height={24}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                  <FoodTypeIcon name={cfg.iconName} className="w-5 h-5" style={{ color: cfg.stroke }} />
+                  <FoodTypeIcon name={cfg.iconName} className="w-5 h-5" style={{ color: dm ? cfg.strokeDark : cfg.stroke }} />
                 </div>
               </foreignObject>
-              <text x={labelPos.x} y={labelPos.y + 13} textAnchor="middle" dominantBaseline="central" fontSize="14" fontWeight="700" fill={cfg.stroke} fontFamily="system-ui, sans-serif">
+              <text x={labelPos.x} y={labelPos.y + 13} textAnchor="middle" dominantBaseline="central" fontSize="15" fontWeight="500" fill={dm ? cfg.textColorDark : cfg.textColor} fontFamily="var(--font-display), Georgia, serif">
                 {cfg.label}
               </text>
               {sectorFoods.map((food, i) => {
-                const pos = positions[i]
-                if (!pos) return null
+                const rawPos = positions[i]
+                if (!rawPos) return null
+                const w = chipWidth(food.name)
+                const pos = clampChipPos(rawPos, w)
                 const isDragging = plateDragGhost?.foodId === food.id
                 return (
                   <g
@@ -192,14 +216,9 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
                       }
                     }}
                   >
-                    <foreignObject x={pos.x - 12} y={pos.y - 12} width={24} height={24}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <FoodTypeIcon name={cfg.iconName} className="w-4 h-4" style={{ color: cfg.stroke }} />
-                      </div>
-                    </foreignObject>
-                    <rect x={pos.x - 30} y={pos.y + 11} width={60} height={18} rx={9} fill={dm ? 'rgba(31, 41, 55, 0.75)' : 'rgba(255, 255, 255, 0.75)'} />
-                    <text x={pos.x} y={pos.y + 20} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill={cfg.textColor} fontWeight="700" fontFamily="system-ui, sans-serif">
-                      {food.name.length <= 10 ? food.name : food.name.slice(0, 9) + '…'}
+                    <rect x={pos.x - w / 2} y={pos.y - CHIP_HEIGHT / 2} width={w} height={CHIP_HEIGHT} rx={CHIP_HEIGHT / 2} fill={dm ? 'rgba(28, 25, 23, 0.85)' : 'rgba(255, 255, 255, 0.88)'} stroke={dm ? cfg.strokeDark : cfg.stroke} strokeOpacity="0.3" />
+                    <text x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="central" fontSize="10" fill={dm ? cfg.textColorDark : cfg.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
+                      {chipDisplayName(food.name)}
                     </text>
                     <title>{food.name}</title>
                   </g>
@@ -211,23 +230,25 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
 
         <circle cx={PLATE_CX} cy={PLATE_CY} r={PLATE_R} fill="url(#sectorOverlay)" style={{ pointerEvents: 'none' }} />
 
-        <circle cx={PLATE_CX} cy={PLATE_CY} r={PLATE_INNER_R} fill={dm ? '#075985' : '#e0f2fe'} stroke={dm ? '#38bdf8' : '#7dd3fc'} strokeWidth="1.5" />
-        <circle cx={PLATE_CX} cy={PLATE_CY} r={7} fill={dm ? '#38bdf8' : '#86efac'} opacity="0.7" />
+        <circle cx={PLATE_CX} cy={PLATE_CY} r={PLATE_INNER_R} fill={dm ? '#364a2e' : '#e8efe4'} stroke={dm ? '#5f7a4f' : '#c3d1b8'} strokeWidth="1.5" />
+        <circle cx={PLATE_CX} cy={PLATE_CY} r={7} fill={dm ? '#8fae7e' : '#a9c096'} opacity="0.7" />
 
         {plateDragGhost && (() => {
           const draggedFood = loveFoods.find(f => f.id === plateDragGhost.foodId)
           const ft = draggedFood?.foodType ?? 'other'
           const cfg2 = FOOD_TYPE_CONFIG[ft]
+          const ghostName = draggedFood?.name ?? ''
+          const gw = chipWidth(ghostName)
+          const gx = plateDragGhost.svgX
+          const gy = plateDragGhost.svgY
           return (
-            <g style={{ pointerEvents: 'none' }} opacity="0.95" filter="url(#ghostShadow)" transform={`translate(${plateDragGhost.svgX}, ${plateDragGhost.svgY}) scale(1.15) translate(${-plateDragGhost.svgX}, ${-plateDragGhost.svgY})`}>
-              <circle cx={plateDragGhost.svgX} cy={plateDragGhost.svgY} r={16} fill={dm ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)'} />
-              <foreignObject x={plateDragGhost.svgX - 12} y={plateDragGhost.svgY - 12} width={24} height={24}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                  <FoodTypeIcon name={cfg2.iconName} className="w-5 h-5" style={{ color: cfg2.stroke }} />
-                </div>
-              </foreignObject>
+            <g style={{ pointerEvents: 'none' }} opacity="0.95" filter="url(#ghostShadow)" transform={`translate(${gx}, ${gy}) scale(1.15) translate(${-gx}, ${-gy})`}>
+              <rect x={gx - gw / 2} y={gy - CHIP_HEIGHT / 2} width={gw} height={CHIP_HEIGHT} rx={CHIP_HEIGHT / 2} fill={dm ? 'rgba(28, 25, 23, 0.9)' : 'rgba(255, 255, 255, 0.9)'} stroke={dm ? cfg2.strokeDark : cfg2.stroke} strokeOpacity="0.3" />
+              <text x={gx} y={gy} textAnchor="middle" dominantBaseline="central" fontSize="10" fill={dm ? cfg2.textColorDark : cfg2.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
+                {chipDisplayName(ghostName)}
+              </text>
               {plateDragGhost.outside && (
-                <text x={plateDragGhost.svgX} y={plateDragGhost.svgY + 26} textAnchor="middle" fontSize="12" fill="#ef4444" fontWeight="700">Release to remove</text>
+                <text x={gx} y={gy + 26} textAnchor="middle" fontSize="12" fill="#ef4444" fontWeight="700">Release to remove</text>
               )}
             </g>
           )
@@ -245,7 +266,7 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           aria-haspopup="listbox"
           aria-autocomplete="list"
           aria-controls="plate-autocomplete"
-          className={`w-full px-4 py-2.5 text-sm border rounded-2xl ${dm ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500' : 'bg-white border-gray-300 placeholder-gray-400'} focus:outline-none focus:border-green-400`}
+          className={`w-full px-4 py-2.5 text-sm border rounded-2xl focus:outline-none focus:ring-1 ${dm ? 'bg-stone-800 border-stone-600 text-stone-200 placeholder-stone-500 focus:border-green-500/50 focus:ring-green-500/30' : 'bg-white border-stone-200 text-stone-800 placeholder-stone-400 focus:border-green-700/50 focus:ring-green-700/30'}`}
           onChange={e => {
             setPlateInput(e.target.value)
             setShowAutocomplete(e.target.value.length > 0)
@@ -262,11 +283,11 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           }}
         />
         {showAutocomplete && filtered.length > 0 && (
-          <ul id="plate-autocomplete" role="listbox" aria-label="Food suggestions" className="absolute z-20 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-36 overflow-y-auto top-full mt-1 list-none p-0 m-0">
+          <ul id="plate-autocomplete" role="listbox" aria-label="Food suggestions" className={`absolute z-20 w-full border rounded-xl shadow-lg max-h-36 overflow-y-auto top-full mt-1 list-none p-0 m-0 ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}>
             {filtered.map(name => (
               <li key={name} role="option" aria-selected={false}>
                 <button
-                  className="w-full text-left px-3 py-1.5 text-sm hover:bg-green-50 focus:bg-green-50 focus:outline-none"
+                  className={`w-full text-left px-3 py-1.5 text-sm focus:outline-none ${dm ? 'text-stone-200 hover:bg-stone-700 focus:bg-stone-700' : 'text-stone-700 hover:bg-stone-50 focus:bg-stone-50'}`}
                   onMouseDown={e => e.preventDefault()}
                   onClick={() => {
                     onAddFood(name, 'love')
@@ -286,34 +307,51 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
         <div className="fixed inset-0 z-30" onClick={() => setPlatePopover(null)}
           onKeyDown={e => { if (e.key === 'Escape') setPlatePopover(null) }}
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Options for ${platePopover.food.name}`}
-            className="absolute bg-white rounded-2xl shadow-xl border border-gray-200 p-3 w-44"
-            style={{ left: Math.min(platePopover.x, window.innerWidth - 184), top: Math.min(platePopover.y - 8, window.innerHeight - 140) }}
-            onClick={e => e.stopPropagation()}
-          >
-            <p className="text-sm font-semibold text-gray-800 mb-2 truncate">{platePopover.food.name}</p>
-            <button
-              className="w-full text-left px-3 py-1.5 rounded-xl text-sm hover:bg-green-50 text-green-700 mb-1"
-              onClick={() => { onMoveFood(platePopover.food, 'exploring'); setPlatePopover(null) }}
-            >
-              🌱 Move to Exploring
-            </button>
-            <button
-              className="w-full text-left px-3 py-1.5 rounded-xl text-sm hover:bg-red-50 text-red-600 mb-1"
-              onClick={() => { onDeleteFood(platePopover.food.id); setPlatePopover(null) }}
-            >
-              🗑️ Remove
-            </button>
-            <button
-              className="w-full text-left px-3 py-1.5 rounded-xl text-sm hover:bg-gray-50 text-gray-600"
-              onClick={() => { onSelectFood(platePopover.food); setPlatePopover(null) }}
-            >
-              Details →
-            </button>
-          </div>
+          {(() => {
+            const pcfg = FOOD_TYPE_CONFIG[platePopover.food.foodType]
+            return (
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Options for ${platePopover.food.name}`}
+                className={`absolute rounded-2xl border w-48 overflow-hidden ${dm ? 'bg-stone-800 border-stone-700 shadow-xl shadow-black/40' : 'bg-white border-stone-200/60 shadow-lg'}`}
+                style={{ left: Math.min(platePopover.x, window.innerWidth - 200), top: Math.min(platePopover.y - 8, window.innerHeight - 160) }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div className={`px-4 pt-3 pb-2.5 border-b ${dm ? 'border-stone-700' : 'border-stone-100'}`}>
+                  <p className={`text-sm font-semibold truncate ${dm ? 'text-stone-200' : 'text-stone-800'}`}>{platePopover.food.name}</p>
+                  <p className="flex items-center gap-1 text-[11px] font-medium mt-0.5" style={{ color: dm ? pcfg.strokeDark : pcfg.stroke }}>
+                    <FoodTypeIcon name={pcfg.iconName} className="w-3.5 h-3.5 shrink-0" />
+                    {pcfg.label}
+                  </p>
+                </div>
+                <div className="p-1.5">
+                  <button
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-sm ${dm ? 'hover:bg-stone-700 text-green-300' : 'hover:bg-stone-50 text-green-800'}`}
+                    onClick={() => { onMoveFood(platePopover.food, 'exploring'); setPlatePopover(null) }}
+                  >
+                    <Sprout className="w-4 h-4 shrink-0" />
+                    Move to Exploring
+                  </button>
+                  <button
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-sm ${dm ? 'hover:bg-red-900/30 text-red-400' : 'hover:bg-red-50 text-red-600'}`}
+                    onClick={() => { onDeleteFood(platePopover.food.id); setPlatePopover(null) }}
+                  >
+                    <Trash2 className="w-4 h-4 shrink-0" />
+                    Remove
+                  </button>
+                  <div className={`border-t my-1 ${dm ? 'border-stone-700' : 'border-stone-100'}`} />
+                  <button
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-sm ${dm ? 'hover:bg-stone-700 text-stone-400' : 'hover:bg-stone-50 text-stone-600'}`}
+                    onClick={() => { onSelectFood(platePopover.food); setPlatePopover(null) }}
+                  >
+                    Details
+                    <ArrowRight className="w-3.5 h-3.5 ml-auto shrink-0" />
+                  </button>
+                </div>
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>

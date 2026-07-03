@@ -26,10 +26,39 @@ export const FOOD_TYPES: FoodType[] = ['vegetable', 'grain', 'legume', 'other']
 export const CATEGORIES: FoodCategory[] = ['love', 'exploring', 'curious', 'notYet']
 
 export const FOOD_TYPE_CONFIG: Record<FoodType, {
-  label: string; iconName: string; fill: string; stroke: string; textColor: string; startDeg: number; endDeg: number
+  label: string; iconName: string
+  fill: string; stroke: string; textColor: string
+  fillDark: string; strokeDark: string; textColorDark: string
+  startDeg: number; endDeg: number
 }> = {
-  vegetable: { label: 'Vegetables', iconName: 'Leaf',  fill: '#bbf7d0', stroke: '#16a34a', textColor: '#14532d', startDeg: 180, endDeg: 270 },
-  grain:     { label: 'Grains',     iconName: 'Wheat', fill: '#fef3c7', stroke: '#d97706', textColor: '#78350f', startDeg: 270, endDeg: 360 },
-  legume:    { label: 'Legumes',    iconName: 'Bean',  fill: '#fed7aa', stroke: '#c2410c', textColor: '#7c2d12', startDeg: 0,   endDeg: 90  },
-  other:     { label: 'Other',      iconName: 'Nut',   fill: '#d1fae5', stroke: '#059669', textColor: '#064e3b', startDeg: 90,  endDeg: 180 },
+  vegetable: {
+    label: 'Vegetables', iconName: 'Carrot',
+    fill: '#c8dfb0', stroke: '#4f7c33', textColor: '#2f4d1b',
+    fillDark: '#43592b', strokeDark: '#adcc85', textColorDark: '#d9e9c4',
+    startDeg: 180, endDeg: 270,
+  },
+  grain: {
+    label: 'Grains', iconName: 'Wheat',
+    fill: '#f0dc9e', stroke: '#a2781f', textColor: '#63480f',
+    fillDark: '#5f4b1d', strokeDark: '#dbae51', textColorDark: '#efddaa',
+    startDeg: 270, endDeg: 360,
+  },
+  legume: {
+    label: 'Legumes', iconName: 'PeaPod',
+    fill: '#eecca5', stroke: '#ac5c28', textColor: '#6b3813',
+    fillDark: '#603a20', strokeDark: '#d88e56', textColorDark: '#f1d4b5',
+    startDeg: 0, endDeg: 90,
+  },
+  other: {
+    label: 'Other', iconName: 'Acorn',
+    fill: '#bcdccb', stroke: '#33755a', textColor: '#1f4936',
+    fillDark: '#2f4a3c', strokeDark: '#83b79b', textColorDark: '#cfe3d7',
+    startDeg: 90, endDeg: 180,
+  },
+}
+
+// Shared progress-ring colors (SVG strokes can't use Tailwind classes)
+export const PROGRESS_RING = {
+  track: { light: '#e7e5e4', dark: '#44403c' },
+  bar:   { light: '#15803d', dark: '#4ade80' },
 }

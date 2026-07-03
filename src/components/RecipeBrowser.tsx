@@ -16,13 +16,13 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers
 
   return (
     <section className="max-w-6xl mx-auto px-4 pb-8">
-      <h2 className={`text-2xl font-bold italic mb-1 ${dm ? 'text-gray-200' : 'text-gray-800'}`} style={{ fontFamily: 'var(--font-display)' }}>
+      <h2 className={`text-2xl font-bold italic mb-1 ${dm ? 'text-stone-200' : 'text-stone-800'}`} style={{ fontFamily: 'var(--font-display)' }}>
         Recipes
       </h2>
-      <p className={`text-sm mb-4 ${dm ? 'text-gray-500' : 'text-stone-400'}`}>{recipes.length} plant-based recipes</p>
+      <p className={`text-sm mb-4 ${dm ? 'text-stone-500' : 'text-stone-400'}`}>{recipes.length} plant-based recipes</p>
       <div className="flex flex-wrap items-center gap-1.5 mb-6">
         <button onClick={() => onFilterChange('quick')}
-          className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs font-medium ${recipeFilter === 'quick' ? 'bg-amber-500 text-white' : dm ? 'bg-amber-900/40 text-amber-300 hover:bg-amber-900/60' : 'bg-amber-100 text-amber-800 hover:bg-amber-200'}`}
+          className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs font-medium ${recipeFilter === 'quick' ? 'bg-amber-700 text-white' : dm ? 'bg-amber-900/40 text-amber-300 hover:bg-amber-900/60' : 'bg-amber-100/70 text-amber-800 hover:bg-amber-100'}`}
         >
           ⚡ Quick &amp; easy
         </button>
@@ -31,7 +31,7 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers
         )}
         {recipeCategories.map(cat => (
           <button key={cat} onClick={() => onFilterChange(cat)}
-            className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs ${recipeFilter === cat ? 'bg-green-900 text-white' : dm ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-stone-100 text-gray-700 hover:bg-stone-200'}`}
+            className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs ${recipeFilter === cat ? 'bg-green-800 text-white' : dm ? 'bg-stone-800 text-stone-300 hover:bg-stone-700' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}
           >
             {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
           </button>
