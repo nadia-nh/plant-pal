@@ -4,7 +4,6 @@ import { useRef, useState, useEffect } from 'react'
 import { Food, FoodCategory } from '@/lib/types'
 import {
   PLATE_CX, PLATE_CY, PLATE_R, PLATE_INNER_R, PLATE_RIM_WIDTH,
-  FOOD_RING_INNER_R, FOOD_RING_OUTER_R, FOOD_CIRCLE_PAD,
   DRAG_CLICK_THRESHOLD, FOOD_TYPE_CONFIG, FOOD_TYPES,
 } from '@/lib/constants'
 import { getAllSuggestedFoods } from '@/lib/foods'
@@ -24,26 +23,50 @@ function makeSectorPath(cx: number, cy: number, outerR: number, innerR: number, 
   return `M ${iS.x} ${iS.y} L ${oS.x} ${oS.y} A ${outerR} ${outerR} 0 ${large} 1 ${oE.x} ${oE.y} L ${iE.x} ${iE.y} A ${innerR} ${innerR} 0 ${large} 0 ${iS.x} ${iS.y} Z`
 }
 
+const CHIP_HEIGHT = 20
+const CHIP_ICON = 13
+
+function chipDisplayName(name: string): string {
+  return name.length <= 14 ? name : name.slice(0, 13) + '…'
+}
+
+function chipWidth(name: string): number {
+  return 6 + CHIP_ICON + 4 + chipDisplayName(name).length * 5.6 + 8
+}
+
+// Slide a chip horizontally so it stays between the plate rim and the
+// vertical sector divider; rows keep their height so chips never pile up
+function clampChipPos(pos: { x: number; y: number }, w: number): { x: number; y: number } {
+  const margin = PLATE_R - 10
+  const dx = pos.x - PLATE_CX
+  const dy = pos.y - PLATE_CY
+  const chord = Math.sqrt(Math.max(margin * margin - dy * dy, 0))
+  const rimMax = chord - w / 2
+  const dividerMin = w / 2 + 4
+  const xAbs = rimMax < dividerMin
+    ? Math.max(rimMax, 0)
+    : Math.min(Math.max(Math.abs(dx), dividerMin), rimMax)
+  return { x: PLATE_CX + Math.sign(dx || 1) * xAbs, y: pos.y }
+}
+
+// Chips stack at evenly spaced heights within their quarter-wedge, centered
+// between the vertical divider and the rim at each height — horizontal
+// capsules read as neat rows and never cross into a neighboring sector
 function getFoodCirclePositions(count: number, startDeg: number, endDeg: number, cx: number, cy: number): Array<{x: number; y: number}> {
   if (count === 0) return []
-  const innerR = FOOD_RING_INNER_R
-  const outerR = FOOD_RING_OUTER_R
-  const usableStart = startDeg + FOOD_CIRCLE_PAD
-  const usableEnd = endDeg - FOOD_CIRCLE_PAD
-  const usableRange = usableEnd - usableStart
-  const maxPerRow = 2
-  const rows = Math.ceil(count / maxPerRow)
-  const rStep = (outerR - innerR) / rows
+  const midRad = (((startDeg + endDeg) / 2) * Math.PI) / 180
+  const signX = Math.cos(midRad) < 0 ? -1 : 1
+  const signY = Math.sin(midRad) < 0 ? -1 : 1
+  const midDy = 102
+  const spacing = 23
+  const half = count === 1 ? 0 : Math.min(47, (spacing * (count - 1)) / 2)
+  const margin = PLATE_R - 10
   const positions: Array<{x: number; y: number}> = []
-  let placed = 0
-  for (let row = 0; row < rows && placed < count; row++) {
-    const r = innerR + rStep * (row + 0.5)
-    const inRow = Math.min(maxPerRow, count - placed)
-    for (let i = 0; i < inRow; i++) {
-      const t = inRow === 1 ? 0.5 : i / (inRow - 1)
-      positions.push(polarToXY(cx, cy, r, usableStart + usableRange * t))
-      placed++
-    }
+  for (let i = 0; i < count; i++) {
+    const t = count === 1 ? 0.5 : i / (count - 1)
+    const absDy = midDy - half + 2 * half * t
+    const chord = Math.sqrt(Math.max(margin * margin - absDy * absDy, 0))
+    positions.push({ x: cx + signX * chord * 0.55, y: cy + signY * absDy })
   }
   return positions
 }
@@ -170,8 +193,10 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
                 {cfg.label}
               </text>
               {sectorFoods.map((food, i) => {
-                const pos = positions[i]
-                if (!pos) return null
+                const rawPos = positions[i]
+                if (!rawPos) return null
+                const w = chipWidth(food.name)
+                const pos = clampChipPos(rawPos, w)
                 const isDragging = plateDragGhost?.foodId === food.id
                 return (
                   <g
@@ -192,14 +217,14 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
                       }
                     }}
                   >
-                    <foreignObject x={pos.x - 12} y={pos.y - 12} width={24} height={24}>
+                    <rect x={pos.x - w / 2} y={pos.y - CHIP_HEIGHT / 2} width={w} height={CHIP_HEIGHT} rx={CHIP_HEIGHT / 2} fill={dm ? 'rgba(28, 25, 23, 0.85)' : 'rgba(255, 255, 255, 0.88)'} stroke={dm ? cfg.strokeDark : cfg.stroke} strokeOpacity="0.3" />
+                    <foreignObject x={pos.x - w / 2 + 6} y={pos.y - CHIP_ICON / 2} width={CHIP_ICON} height={CHIP_ICON}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <FoodTypeIcon name={cfg.iconName} className="w-4 h-4" style={{ color: dm ? cfg.strokeDark : cfg.stroke }} />
+                        <FoodTypeIcon name={cfg.iconName} className="w-full h-full" style={{ color: dm ? cfg.strokeDark : cfg.stroke }} />
                       </div>
                     </foreignObject>
-                    <rect x={pos.x - 30} y={pos.y + 11} width={60} height={18} rx={9} fill={dm ? 'rgba(41, 37, 36, 0.75)' : 'rgba(255, 255, 255, 0.75)'} />
-                    <text x={pos.x} y={pos.y + 20} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill={dm ? cfg.textColorDark : cfg.textColor} fontWeight="700" fontFamily="system-ui, sans-serif">
-                      {food.name.length <= 10 ? food.name : food.name.slice(0, 9) + '…'}
+                    <text x={pos.x - w / 2 + 6 + CHIP_ICON + 4} y={pos.y} textAnchor="start" dominantBaseline="central" fontSize="10" fill={dm ? cfg.textColorDark : cfg.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
+                      {chipDisplayName(food.name)}
                     </text>
                     <title>{food.name}</title>
                   </g>
@@ -218,16 +243,23 @@ export function Plate({ loveFoods, darkMode, onAddFood, onMoveFood, onDeleteFood
           const draggedFood = loveFoods.find(f => f.id === plateDragGhost.foodId)
           const ft = draggedFood?.foodType ?? 'other'
           const cfg2 = FOOD_TYPE_CONFIG[ft]
+          const ghostName = draggedFood?.name ?? ''
+          const gw = chipWidth(ghostName)
+          const gx = plateDragGhost.svgX
+          const gy = plateDragGhost.svgY
           return (
-            <g style={{ pointerEvents: 'none' }} opacity="0.95" filter="url(#ghostShadow)" transform={`translate(${plateDragGhost.svgX}, ${plateDragGhost.svgY}) scale(1.15) translate(${-plateDragGhost.svgX}, ${-plateDragGhost.svgY})`}>
-              <circle cx={plateDragGhost.svgX} cy={plateDragGhost.svgY} r={16} fill={dm ? 'rgba(41, 37, 36, 0.9)' : 'rgba(255, 255, 255, 0.9)'} />
-              <foreignObject x={plateDragGhost.svgX - 12} y={plateDragGhost.svgY - 12} width={24} height={24}>
+            <g style={{ pointerEvents: 'none' }} opacity="0.95" filter="url(#ghostShadow)" transform={`translate(${gx}, ${gy}) scale(1.15) translate(${-gx}, ${-gy})`}>
+              <rect x={gx - gw / 2} y={gy - CHIP_HEIGHT / 2} width={gw} height={CHIP_HEIGHT} rx={CHIP_HEIGHT / 2} fill={dm ? 'rgba(28, 25, 23, 0.9)' : 'rgba(255, 255, 255, 0.9)'} stroke={dm ? cfg2.strokeDark : cfg2.stroke} strokeOpacity="0.3" />
+              <foreignObject x={gx - gw / 2 + 6} y={gy - CHIP_ICON / 2} width={CHIP_ICON} height={CHIP_ICON}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                  <FoodTypeIcon name={cfg2.iconName} className="w-5 h-5" style={{ color: dm ? cfg2.strokeDark : cfg2.stroke }} />
+                  <FoodTypeIcon name={cfg2.iconName} className="w-full h-full" style={{ color: dm ? cfg2.strokeDark : cfg2.stroke }} />
                 </div>
               </foreignObject>
+              <text x={gx - gw / 2 + 6 + CHIP_ICON + 4} y={gy} textAnchor="start" dominantBaseline="central" fontSize="10" fill={dm ? cfg2.textColorDark : cfg2.textColor} fontWeight="600" fontFamily="system-ui, sans-serif">
+                {chipDisplayName(ghostName)}
+              </text>
               {plateDragGhost.outside && (
-                <text x={plateDragGhost.svgX} y={plateDragGhost.svgY + 26} textAnchor="middle" fontSize="12" fill="#ef4444" fontWeight="700">Release to remove</text>
+                <text x={gx} y={gy + 26} textAnchor="middle" fontSize="12" fill="#ef4444" fontWeight="700">Release to remove</text>
               )}
             </g>
           )
