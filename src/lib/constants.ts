@@ -28,8 +28,14 @@ export const CATEGORIES: FoodCategory[] = ['love', 'exploring', 'curious', 'notY
 export const FOOD_TYPE_CONFIG: Record<FoodType, {
   label: string; iconName: string; fill: string; stroke: string; textColor: string; startDeg: number; endDeg: number
 }> = {
-  vegetable: { label: 'Vegetables', iconName: 'Leaf',  fill: '#bbf7d0', stroke: '#16a34a', textColor: '#14532d', startDeg: 180, endDeg: 270 },
-  grain:     { label: 'Grains',     iconName: 'Wheat', fill: '#fef3c7', stroke: '#d97706', textColor: '#78350f', startDeg: 270, endDeg: 360 },
-  legume:    { label: 'Legumes',    iconName: 'Bean',  fill: '#fed7aa', stroke: '#c2410c', textColor: '#7c2d12', startDeg: 0,   endDeg: 90  },
-  other:     { label: 'Other',      iconName: 'Nut',   fill: '#d1fae5', stroke: '#059669', textColor: '#064e3b', startDeg: 90,  endDeg: 180 },
+  vegetable: { label: 'Vegetables', iconName: 'Leaf',  fill: '#dce7d5', stroke: '#5f7a4f', textColor: '#364a2e', startDeg: 180, endDeg: 270 },
+  grain:     { label: 'Grains',     iconName: 'Wheat', fill: '#f3e5c8', stroke: '#a3803c', textColor: '#6b5320', startDeg: 270, endDeg: 360 },
+  legume:    { label: 'Legumes',    iconName: 'Bean',  fill: '#f0d9c8', stroke: '#ad6b46', textColor: '#6e4028', startDeg: 0,   endDeg: 90  },
+  other:     { label: 'Other',      iconName: 'Nut',   fill: '#d5e3dd', stroke: '#4e7d6c', textColor: '#2f4d42', startDeg: 90,  endDeg: 180 },
+}
+
+// Shared progress-ring colors (SVG strokes can't use Tailwind classes)
+export const PROGRESS_RING = {
+  track: { light: '#e7e5e4', dark: '#44403c' },
+  bar:   { light: '#15803d', dark: '#4ade80' },
 }

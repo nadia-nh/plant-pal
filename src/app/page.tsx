@@ -51,11 +51,11 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
       return (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-center">
           <p className="text-2xl">🌱</p>
-          <p className="text-lg font-medium text-gray-700">Something went wrong</p>
-          <p className="text-sm text-gray-500">Try refreshing the page</p>
+          <p className="text-lg font-medium text-stone-700">Something went wrong</p>
+          <p className="text-sm text-stone-500">Try refreshing the page</p>
           <button
             onClick={() => this.setState({ error: null })}
-            className="px-4 py-2 rounded-full bg-emerald-600 text-white text-sm hover:bg-emerald-700"
+            className="px-4 py-2 rounded-full bg-green-800 text-white text-sm hover:bg-green-900"
           >
             Try again
           </button>
@@ -285,15 +285,15 @@ function Home() {
   const dm = darkMode
 
   return (
-    <main className={`min-h-screen pb-20 ${dm ? 'bg-gray-900' : 'bg-[#fcfaf8]'}`}>
-      <header className={`sticky top-0 z-50 backdrop-blur-xl shadow-sm mb-6 px-6 py-4 border-b ${dm ? 'bg-emerald-950/80 border-emerald-900/50' : 'bg-emerald-600/90 border-emerald-500/50'}`}>
+    <main className={`min-h-screen pb-20 ${dm ? 'bg-stone-900' : 'bg-[#faf7f2]'}`}>
+      <header className={`sticky top-0 z-50 backdrop-blur-xl mb-6 px-6 py-4 border-b ${dm ? 'bg-stone-900/85 border-stone-800' : 'bg-[#faf7f2]/85 border-stone-200/70'}`}>
         <div className="flex justify-between items-center mb-4">
           <div className="w-10" />
-          <h1 className="text-4xl font-bold italic text-white" style={{ fontFamily: 'var(--font-display)' }}>Plant Pal</h1>
+          <h1 className={`text-4xl font-bold italic ${dm ? 'text-green-200' : 'text-green-900'}`} style={{ fontFamily: 'var(--font-display)' }}>Plant Pal</h1>
           <div className="relative">
             <button
               onClick={() => setShowOptionsMenu(o => !o)}
-              className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white text-2xl leading-none rounded-full hover:bg-white/10 transition-colors"
+              className={`w-10 h-10 flex items-center justify-center text-2xl leading-none rounded-full transition-colors ${dm ? 'text-stone-400 hover:text-stone-200 hover:bg-stone-800' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-200/60'}`}
               aria-label="Options"
             >
               ⋯
@@ -301,22 +301,22 @@ function Home() {
             {showOptionsMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowOptionsMenu(false)} />
-                <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl z-50 py-1 min-w-40 border border-stone-100">
-                  <button onClick={() => { setDarkMode(!dm); setShowOptionsMenu(false) }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-stone-50 flex items-center gap-2">
+                <div className={`absolute right-0 top-full mt-1 rounded-xl shadow-xl z-50 py-1 min-w-40 border ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}>
+                  <button onClick={() => { setDarkMode(!dm); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
                     {dm ? '☀️ Light mode' : '🌙 Dark mode'}
                   </button>
-                  <button onClick={() => { exportData(); setShowOptionsMenu(false) }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-stone-50 flex items-center gap-2">
+                  <button onClick={() => { exportData(); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
                     ↓ Export backup
                   </button>
-                  <label className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-stone-50 flex items-center gap-2 cursor-pointer">
+                  <label className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 cursor-pointer ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
                     ↑ Import backup
                     <input ref={importRef} type="file" accept="application/json" className="sr-only" onChange={e => { importData(e); setShowOptionsMenu(false) }} />
                   </label>
-                  <button onClick={() => { setShowProgress(true); setShowOptionsMenu(false) }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-stone-50 flex items-center gap-2">
+                  <button onClick={() => { setShowProgress(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
                     📊 Stats
                   </button>
-                  <div className="border-t border-stone-100 my-1" />
-                  <button onClick={() => { setShowAuthModal(true); setShowOptionsMenu(false) }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-stone-50 flex items-center gap-2">
+                  <div className={`border-t my-1 ${dm ? 'border-stone-700' : 'border-stone-200'}`} />
+                  <button onClick={() => { setShowAuthModal(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
                     {user ? `👤 Account` : '🔑 Sign in / Sync'}
                   </button>
                 </div>
@@ -330,36 +330,36 @@ function Home() {
             value={searchQuery}
             placeholder="Search your foods…"
             aria-label="Search your foods"
-            className="w-full px-4 py-2 text-sm rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:bg-white/20 transition-colors"
+            className={`w-full px-4 py-2 text-sm rounded-2xl border focus:outline-none focus:ring-1 transition-colors ${dm ? 'bg-stone-800 border-stone-600 text-stone-200 placeholder-stone-500 focus:border-green-500/50 focus:ring-green-500/30' : 'bg-white border-stone-200 text-stone-800 placeholder-stone-400 focus:border-green-700/50 focus:ring-green-700/30'}`}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Escape') setSearchQuery('') }}
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white">✕</button>
+            <button onClick={() => setSearchQuery('')} className={`absolute right-3 top-1/2 -translate-y-1/2 ${dm ? 'text-stone-500 hover:text-stone-300' : 'text-stone-400 hover:text-stone-600'}`}>✕</button>
           )}
         </div>
         {searchResults.length > 0 && (
-          <ul className="mt-1 max-w-sm mx-auto rounded-xl border shadow-lg overflow-hidden bg-white border-stone-200 relative z-10">
+          <ul className={`mt-1 max-w-sm mx-auto rounded-xl border shadow-lg overflow-hidden relative z-10 ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}>
             {searchResults.map(f => (
               <li key={f.id}>
                 <button
-                  className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 text-gray-700 hover:bg-green-50"
+                  className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${dm ? 'text-stone-200 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}
                   onClick={() => { setSelectedFood(f); setSearchQuery('') }}
                 >
                   <span>{f.name}</span>
-                  <span className="ml-auto text-xs text-gray-400">{f.category}</span>
+                  <span className={`ml-auto text-xs ${dm ? 'text-stone-500' : 'text-stone-400'}`}>{f.category}</span>
                 </button>
               </li>
             ))}
           </ul>
         )}
         {searchQuery && searchResults.length === 0 && (
-          <p className="mt-1 text-sm text-white/60 text-center">No foods found</p>
+          <p className={`mt-1 text-sm text-center ${dm ? 'text-stone-500' : 'text-stone-400'}`}>No foods found</p>
         )}
       </header>
 
       {showMessage && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-emerald-800 text-white px-4 py-2 rounded-full shadow-lg z-50 text-sm">
+        <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full shadow-lg z-50 text-sm ${dm ? 'bg-stone-100/95 text-stone-900' : 'bg-stone-800/95 text-stone-50'}`}>
           {showMessage}
         </div>
       )}
@@ -397,13 +397,13 @@ function Home() {
       {activeTab === 'discover' && (
         <div className="max-w-md mx-auto py-6 px-4">
           <h2 className={`text-2xl font-bold italic text-center mb-1 ${dm ? 'text-green-300' : 'text-green-900'}`} style={{ fontFamily: 'var(--font-display)' }}>What to try next</h2>
-          <p className={`text-sm text-center mb-4 ${dm ? 'text-gray-500' : 'text-stone-400'}`}>Based on what&apos;s on your plate</p>
+          <p className={`text-sm text-center mb-4 ${dm ? 'text-stone-500' : 'text-stone-400'}`}>Based on what&apos;s on your plate</p>
           <div className="flex flex-wrap gap-1.5 justify-center mb-6">
             {ALL_DIETARY_TAGS.map(({ tag, label }) => (
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${activeTags.includes(tag) ? 'bg-green-700 text-white border-green-700' : (dm ? 'bg-gray-800 text-gray-400 border-gray-600 hover:border-green-600' : 'bg-white text-gray-500 border-gray-300 hover:border-green-400')}`}
+                className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${activeTags.includes(tag) ? 'bg-green-800 text-white border-green-800' : (dm ? 'bg-stone-800 text-stone-400 border-stone-600 hover:border-green-600' : 'bg-white text-stone-600 border-stone-300 hover:border-green-700/50')}`}
               >
                 {label}
               </button>
@@ -430,6 +430,7 @@ function Home() {
 
       <FoodDetailModal
         food={detailFood}
+        darkMode={darkMode}
         onClose={() => setSelectedFood(null)}
         onMove={moveFood}
         onEditAttempt={(food, attempt) => setEditAttemptTarget({ food, attempt })}
@@ -438,6 +439,7 @@ function Home() {
 
       <AttemptModal
         food={attemptModal ?? editAttemptTarget?.food ?? null}
+        darkMode={darkMode}
         editingAttempt={editAttemptTarget?.attempt ?? null}
         onClose={() => { setAttemptModal(null); setEditAttemptTarget(null) }}
         onSubmit={handleAttemptSubmit}
@@ -483,33 +485,33 @@ function Home() {
         onSkip={completeOnboarding}
       />
 
-      <nav className={`fixed bottom-0 left-0 right-0 z-40 flex border-t pb-safe ${dm ? 'bg-gray-900/90 backdrop-blur-md border-gray-800' : 'bg-white/90 backdrop-blur-md border-gray-100'}`}>
+      <nav className={`fixed bottom-0 left-0 right-0 z-40 flex border-t pb-safe ${dm ? 'bg-stone-900/90 backdrop-blur-md border-stone-800' : 'bg-[#faf7f2]/90 backdrop-blur-md border-stone-200'}`}>
         <button
           onClick={() => setActiveTab('home')}
           className="flex-1 pt-2 pb-3 text-[11px] font-medium flex flex-col items-center gap-1 transition-all"
         >
-          <div className={`p-1.5 rounded-2xl transition-colors ${activeTab === 'home' ? (dm ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (dm ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600')}`}>
+          <div className={`p-1.5 rounded-2xl transition-colors ${activeTab === 'home' ? (dm ? 'bg-green-300/10 text-green-300' : 'bg-green-800/10 text-green-800') : (dm ? 'text-stone-500 hover:text-stone-400' : 'text-stone-400 hover:text-stone-600')}`}>
             <Leaf className="w-5 h-5" />
           </div>
-          <span className={activeTab === 'home' ? (dm ? 'text-emerald-400' : 'text-emerald-700') : (dm ? 'text-gray-500' : 'text-gray-400')}>Home</span>
+          <span className={activeTab === 'home' ? (dm ? 'text-green-300' : 'text-green-800') : (dm ? 'text-stone-500' : 'text-stone-400')}>Home</span>
         </button>
         <button
           onClick={() => setActiveTab('discover')}
           className="flex-1 pt-2 pb-3 text-[11px] font-medium flex flex-col items-center gap-1 transition-all"
         >
-          <div className={`p-1.5 rounded-2xl transition-colors ${activeTab === 'discover' ? (dm ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (dm ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600')}`}>
+          <div className={`p-1.5 rounded-2xl transition-colors ${activeTab === 'discover' ? (dm ? 'bg-green-300/10 text-green-300' : 'bg-green-800/10 text-green-800') : (dm ? 'text-stone-500 hover:text-stone-400' : 'text-stone-400 hover:text-stone-600')}`}>
             <Compass className="w-5 h-5" />
           </div>
-          <span className={activeTab === 'discover' ? (dm ? 'text-emerald-400' : 'text-emerald-700') : (dm ? 'text-gray-500' : 'text-gray-400')}>Discover</span>
+          <span className={activeTab === 'discover' ? (dm ? 'text-green-300' : 'text-green-800') : (dm ? 'text-stone-500' : 'text-stone-400')}>Discover</span>
         </button>
         <button
           onClick={() => setActiveTab('recipes')}
           className="flex-1 pt-2 pb-3 text-[11px] font-medium flex flex-col items-center gap-1 transition-all"
         >
-          <div className={`p-1.5 rounded-2xl transition-colors ${activeTab === 'recipes' ? (dm ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (dm ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600')}`}>
+          <div className={`p-1.5 rounded-2xl transition-colors ${activeTab === 'recipes' ? (dm ? 'bg-green-300/10 text-green-300' : 'bg-green-800/10 text-green-800') : (dm ? 'text-stone-500 hover:text-stone-400' : 'text-stone-400 hover:text-stone-600')}`}>
             <ChefHat className="w-5 h-5" />
           </div>
-          <span className={activeTab === 'recipes' ? (dm ? 'text-emerald-400' : 'text-emerald-700') : (dm ? 'text-gray-500' : 'text-gray-400')}>Recipes</span>
+          <span className={activeTab === 'recipes' ? (dm ? 'text-green-300' : 'text-green-800') : (dm ? 'text-stone-500' : 'text-stone-400')}>Recipes</span>
         </button>
       </nav>
     </main>

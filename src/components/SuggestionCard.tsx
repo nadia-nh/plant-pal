@@ -90,8 +90,8 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
 
   if (!currentSuggestion) {
     return (
-      <div className={`${dm ? 'bg-gray-800 border-green-800' : 'bg-white border-green-200'} rounded-2xl border-2 shadow-lg p-8`}>
-        <p className="text-center text-gray-500">No more suggestions right now — check back later!</p>
+      <div className={`${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'} rounded-2xl border shadow-lg p-8`}>
+        <p className={`text-center ${dm ? 'text-stone-400' : 'text-stone-500'}`}>No more suggestions right now — check back later!</p>
       </div>
     )
   }
@@ -157,7 +157,7 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
         role="article"
         aria-label={`${currentSuggestion} suggestion. Use left/right arrow keys or swipe to skip or add.`}
         tabIndex={0}
-        className="relative h-72 cursor-grab active:cursor-grabbing select-none touch-none focus:outline-2 focus:outline-green-400 rounded-2xl"
+        className="relative h-72 cursor-grab active:cursor-grabbing select-none touch-none focus:outline-2 focus:outline-green-700 rounded-2xl"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -169,10 +169,10 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
       >
         <div
           ref={cardInnerRef}
-          className="absolute inset-0 bg-white rounded-2xl border border-green-200 shadow-lg overflow-hidden flex flex-col"
+          className={`absolute inset-0 rounded-2xl border shadow-lg overflow-hidden flex flex-col ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}
           style={{ willChange: 'transform' }}
         >
-          <div className="relative w-full flex-1 bg-green-100 flex items-center justify-center overflow-hidden">
+          <div className={`relative w-full flex-1 flex items-center justify-center overflow-hidden ${dm ? 'bg-stone-700' : 'bg-stone-100'}`}>
             {imgFallback !== 'emoji'
               ? <img
                   key={`${currentSuggestion}-${imgFallback}`}
@@ -190,7 +190,7 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
               </span>
             )}
             {hint && (
-              <span className="absolute top-2 right-2 inline-flex items-center gap-1 bg-amber-500/90 text-white text-xs font-semibold px-2 py-1 rounded-full leading-none">
+              <span className="absolute top-2 right-2 inline-flex items-center gap-1 bg-amber-700/90 text-white text-xs font-semibold px-2 py-1 rounded-full leading-none">
                 {hint}
               </span>
             )}
@@ -200,35 +200,35 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
           </div>
         </div>
         {swipeDir === 'right' && (
-          <div className="absolute inset-0 bg-green-400/30 rounded-2xl flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-green-700/25 rounded-2xl flex items-center justify-center pointer-events-none">
             <span className="text-white font-bold text-2xl drop-shadow-lg">✓ Try it!</span>
           </div>
         )}
         {swipeDir === 'left' && (
-          <div className="absolute inset-0 bg-gray-400/30 rounded-2xl flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-stone-500/30 rounded-2xl flex items-center justify-center pointer-events-none">
             <span className="text-white font-bold text-2xl drop-shadow-lg">→ Skip</span>
           </div>
         )}
       </div>
 
       {exampleRecipe && (
-        <p className="text-xs text-center text-green-600 mt-2">✨ Try: {exampleRecipe.title}</p>
+        <p className={`text-xs text-center mt-2 ${dm ? 'text-green-300/80' : 'text-green-800/80'}`}>✨ Try: {exampleRecipe.title}</p>
       )}
 
       <div className="flex items-center justify-around mt-6 px-8">
         <div className="flex flex-col items-center gap-1">
           <button
             onClick={onSkip}
-            className="w-14 h-14 rounded-full bg-white border border-stone-300 text-stone-500 text-2xl hover:bg-stone-50 flex items-center justify-center shadow transition-colors"
+            className={`w-14 h-14 rounded-full border text-2xl flex items-center justify-center shadow transition-colors ${dm ? 'bg-stone-800 border-stone-600 text-stone-400 hover:bg-stone-700' : 'bg-white border-stone-300 text-stone-500 hover:bg-stone-50'}`}
           >→</button>
-          <span className="text-xs text-stone-400">Skip</span>
+          <span className={`text-xs ${dm ? 'text-stone-500' : 'text-stone-400'}`}>Skip</span>
         </div>
         <div className="flex flex-col items-center gap-1">
           <button
             onClick={() => onAdd('exploring')}
-            className="w-14 h-14 rounded-full bg-green-900 text-white text-2xl hover:bg-green-800 flex items-center justify-center shadow transition-colors"
+            className="w-14 h-14 rounded-full bg-green-800 text-white text-2xl hover:bg-green-900 flex items-center justify-center shadow transition-colors"
           >✓</button>
-          <span className="text-xs text-green-800 font-semibold">Try it!</span>
+          <span className={`text-xs font-semibold ${dm ? 'text-green-300' : 'text-green-900'}`}>Try it!</span>
         </div>
       </div>
     </>

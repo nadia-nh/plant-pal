@@ -119,7 +119,7 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
             {[1, 2, 3].map(n => (
               <div
                 key={n}
-                className={`h-1.5 rounded-full transition-all duration-300 ${n <= step ? 'w-6 bg-green-600' : 'w-1.5 bg-gray-200'}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${n <= step ? 'w-6 bg-green-800' : 'w-1.5 bg-stone-200'}`}
               />
             ))}
           </div>
@@ -137,22 +137,22 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
               >
                 Welcome to Plant Pal
               </h2>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-stone-500 mt-2">
                 A gentle guide to exploring plant-based foods at your own pace.
               </p>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-stone-600">
               Let&apos;s set up your personal plate — it takes about 30 seconds.
             </p>
             <button
               onClick={() => setStep(1)}
-              className="w-full py-3 rounded-xl text-sm font-medium bg-green-700 text-white hover:bg-green-800 transition-colors"
+              className="w-full py-3 rounded-xl text-sm font-medium bg-green-800 text-white hover:bg-green-900 transition-colors"
             >
               Let&apos;s get started →
             </button>
             <button
               onClick={onSkip}
-              className="text-xs text-gray-400 hover:text-gray-600 underline"
+              className="text-xs text-stone-400 hover:text-stone-600 underline"
             >
               Skip setup
             </button>
@@ -166,10 +166,10 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
               <h2 id="welcome-modal-title" className="text-lg font-semibold text-green-900">
                 Which of these do you already enjoy?
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-stone-500 mt-1">
                 Pick 2–5 foods you know and like
                 {selectedFoods.length > 0 && (
-                  <span className="ml-2 font-medium text-green-700">
+                  <span className="ml-2 font-medium text-green-800">
                     ({selectedFoods.length}/5)
                   </span>
                 )}
@@ -187,10 +187,10 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
                       disabled={maxed}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors ${
                         selected
-                          ? 'bg-green-700 text-white border-green-700'
+                          ? 'bg-green-800 text-white border-green-800'
                           : maxed
-                          ? 'bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-green-400 hover:text-green-700'
+                          ? 'bg-stone-50 text-stone-300 border-stone-200 cursor-not-allowed'
+                          : 'bg-white text-stone-700 border-stone-300 hover:border-green-700/50 hover:text-green-900'
                       }`}
                     >
                       <span aria-hidden="true">{food.emoji}</span>
@@ -200,17 +200,17 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
                 })}
               </div>
             </div>
-            <div className="space-y-2 pt-3 border-t border-gray-100">
+            <div className="space-y-2 pt-3 border-t border-stone-200">
               <button
                 onClick={() => setStep(2)}
                 disabled={selectedFoods.length < 2}
-                className="w-full py-2.5 rounded-xl text-sm font-medium bg-green-700 text-white hover:bg-green-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-full py-2.5 rounded-xl text-sm font-medium bg-green-800 text-white hover:bg-green-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Next →
               </button>
               <button
                 onClick={onSkip}
-                className="w-full text-xs text-gray-400 hover:text-gray-600 py-1"
+                className="w-full text-xs text-stone-400 hover:text-stone-600 py-1"
               >
                 Skip setup
               </button>
@@ -225,7 +225,7 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
               <h2 id="welcome-modal-title" className="text-lg font-semibold text-green-900">
                 What makes eating more plants tricky?
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-stone-500 mt-1">
                 Select all that apply — or skip if nothing fits
               </p>
             </div>
@@ -238,8 +238,8 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
                     onClick={() => toggleBarrier(barrier.id)}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors ${
                       selected
-                        ? 'bg-green-700 text-white border-green-700'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-green-400 hover:text-green-700'
+                        ? 'bg-green-800 text-white border-green-800'
+                        : 'bg-white text-stone-700 border-stone-300 hover:border-green-700/50 hover:text-green-900'
                     }`}
                   >
                     <span aria-hidden="true">{barrier.emoji}</span>
@@ -248,16 +248,16 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
                 )
               })}
             </div>
-            <div className="space-y-2 pt-3 border-t border-gray-100">
+            <div className="space-y-2 pt-3 border-t border-stone-200">
               <button
                 onClick={() => setStep(3)}
-                className="w-full py-2.5 rounded-xl text-sm font-medium bg-green-700 text-white hover:bg-green-800 transition-colors"
+                className="w-full py-2.5 rounded-xl text-sm font-medium bg-green-800 text-white hover:bg-green-900 transition-colors"
               >
                 Next →
               </button>
               <button
                 onClick={onSkip}
-                className="w-full text-xs text-gray-400 hover:text-gray-600 py-1"
+                className="w-full text-xs text-stone-400 hover:text-stone-600 py-1"
               >
                 Skip setup
               </button>
@@ -272,7 +272,7 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
               <h2 id="welcome-modal-title" className="text-lg font-semibold text-green-900">
                 Any dietary needs?
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-stone-500 mt-1">
                 We&apos;ll pre-set your filters in the Discover tab. You can always change these later.
               </p>
             </div>
@@ -285,8 +285,8 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
                     onClick={() => toggleDietary(opt.tag)}
                     className={`px-4 py-2 rounded-full text-sm border transition-colors ${
                       selected
-                        ? 'bg-green-700 text-white border-green-700'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-green-400 hover:text-green-700'
+                        ? 'bg-green-800 text-white border-green-800'
+                        : 'bg-white text-stone-700 border-stone-300 hover:border-green-700/50 hover:text-green-900'
                     }`}
                   >
                     {opt.label}
@@ -294,10 +294,10 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
                 )
               })}
             </div>
-            <div className="pt-3 border-t border-gray-100">
+            <div className="pt-3 border-t border-stone-200">
               <button
                 onClick={handleComplete}
-                className="w-full py-2.5 rounded-xl text-sm font-medium bg-green-700 text-white hover:bg-green-800 transition-colors"
+                className="w-full py-2.5 rounded-xl text-sm font-medium bg-green-800 text-white hover:bg-green-900 transition-colors"
               >
                 Let&apos;s go! 🌱
               </button>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { Food } from '@/lib/types'
-import { ATTEMPT_GOAL } from '@/lib/constants'
+import { ATTEMPT_GOAL, PROGRESS_RING } from '@/lib/constants'
 
 interface StatsModalProps {
   open: boolean
@@ -41,41 +41,41 @@ export function StatsModal({ open, onClose, allFoods, darkMode }: StatsModalProp
       onKeyDown={e => { if (e.key === 'Escape') onClose() }}
     >
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="stats-modal-title" tabIndex={-1}
-        className={`${dm ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-sm w-full focus:outline-none`} onClick={e => e.stopPropagation()}>
+        className={`${dm ? 'bg-stone-800' : 'bg-white'} rounded-2xl p-6 max-w-sm w-full focus:outline-none`} onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
           <h3 id="stats-modal-title" className={`font-semibold text-lg ${dm ? 'text-green-300' : 'text-green-900'}`}>Your Food Journey</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button onClick={onClose} className={`text-xl leading-none ${dm ? 'text-stone-500 hover:text-stone-300' : 'text-stone-400 hover:text-stone-600'}`}>✕</button>
         </div>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div className={`rounded-xl p-3 ${dm ? 'bg-gray-700' : 'bg-green-50'}`}>
-              <p className={`text-xs mb-1 ${dm ? 'text-green-400' : 'text-green-700'}`}>On your plate</p>
-              <p className={`text-2xl font-bold ${dm ? 'text-green-300' : 'text-green-800'}`}>{loveFoods.length}</p>
+            <div className={`rounded-xl p-3 ${dm ? 'bg-stone-700/60' : 'bg-stone-50'}`}>
+              <p className={`text-xs mb-1 ${dm ? 'text-stone-400' : 'text-stone-500'}`}>On your plate</p>
+              <p className={`text-2xl font-bold ${dm ? 'text-green-300' : 'text-green-900'}`}>{loveFoods.length}</p>
             </div>
-            <div className={`rounded-xl p-3 ${dm ? 'bg-gray-700' : 'bg-green-50'}`}>
-              <p className={`text-xs mb-1 ${dm ? 'text-green-400' : 'text-green-700'}`}>Total attempts</p>
-              <p className={`text-2xl font-bold ${dm ? 'text-green-300' : 'text-green-800'}`}>{totalAttempts}</p>
+            <div className={`rounded-xl p-3 ${dm ? 'bg-stone-700/60' : 'bg-stone-50'}`}>
+              <p className={`text-xs mb-1 ${dm ? 'text-stone-400' : 'text-stone-500'}`}>Total attempts</p>
+              <p className={`text-2xl font-bold ${dm ? 'text-green-300' : 'text-green-900'}`}>{totalAttempts}</p>
             </div>
           </div>
 
           {mostTried && mostTried.attempts > 0 && (
             <div>
-              <p className={`text-xs mb-1 ${dm ? 'text-green-400' : 'text-green-700'}`}>Most tried</p>
-              <p className={`text-sm font-semibold ${dm ? 'text-gray-200' : 'text-gray-800'}`}>
-                {mostTried.name} <span className={`font-normal ${dm ? 'text-gray-400' : 'text-gray-500'}`}>({mostTried.attempts}×)</span>
+              <p className={`text-xs mb-1 ${dm ? 'text-stone-400' : 'text-stone-500'}`}>Most tried</p>
+              <p className={`text-sm font-semibold ${dm ? 'text-stone-200' : 'text-stone-800'}`}>
+                {mostTried.name} <span className={`font-normal ${dm ? 'text-stone-400' : 'text-stone-500'}`}>({mostTried.attempts}×)</span>
               </p>
             </div>
           )}
 
           {topMethods.length > 0 && (
             <div>
-              <p className={`text-xs mb-2 ${dm ? 'text-green-400' : 'text-green-700'}`}>Favourite methods</p>
+              <p className={`text-xs mb-2 ${dm ? 'text-stone-400' : 'text-stone-500'}`}>Favourite methods</p>
               <div className="space-y-1">
                 {topMethods.map(([method, count]) => (
                   <div key={method} className="flex items-center gap-2">
-                    <div className={`h-1.5 rounded-full bg-green-500`} style={{ width: `${Math.round((count / topMethods[0][1]) * 100)}%`, minWidth: '8px' }} />
-                    <span className={`text-xs truncate ${dm ? 'text-gray-300' : 'text-gray-600'}`}>{method}</span>
-                    <span className={`text-xs ml-auto flex-shrink-0 ${dm ? 'text-gray-500' : 'text-gray-400'}`}>{count}</span>
+                    <div className={`h-1.5 rounded-full ${dm ? 'bg-green-500' : 'bg-green-700'}`} style={{ width: `${Math.round((count / topMethods[0][1]) * 100)}%`, minWidth: '8px' }} />
+                    <span className={`text-xs truncate ${dm ? 'text-stone-300' : 'text-stone-600'}`}>{method}</span>
+                    <span className={`text-xs ml-auto flex-shrink-0 ${dm ? 'text-stone-500' : 'text-stone-400'}`}>{count}</span>
                   </div>
                 ))}
               </div>
@@ -83,28 +83,28 @@ export function StatsModal({ open, onClose, allFoods, darkMode }: StatsModalProp
           )}
 
           <div>
-            <p className={`text-sm mb-2 ${dm ? 'text-green-400' : 'text-green-700'}`}>In progress ({inProgressFoods.length})</p>
+            <p className={`text-sm mb-2 ${dm ? 'text-stone-400' : 'text-stone-500'}`}>In progress ({inProgressFoods.length})</p>
             {inProgressFoods.length > 0 ? (
               <div className="space-y-3">
                 {inProgressFoods.map(f => (
                   <div key={f.id} className="flex items-center gap-3">
-                    <span className={`text-sm w-24 truncate ${dm ? 'text-gray-300' : 'text-gray-700'}`}>{f.name}</span>
+                    <span className={`text-sm w-24 truncate ${dm ? 'text-stone-300' : 'text-stone-700'}`}>{f.name}</span>
                     <div className="relative w-8 h-8">
                       <svg className="w-8 h-8 -rotate-90">
-                        <circle cx="16" cy="16" r="12" stroke="#e5e7eb" strokeWidth="3" fill="none" />
-                        <circle cx="16" cy="16" r="12" stroke="#16a34a" strokeWidth="3" fill="none"
+                        <circle cx="16" cy="16" r="12" stroke={dm ? PROGRESS_RING.track.dark : PROGRESS_RING.track.light} strokeWidth="3" fill="none" />
+                        <circle cx="16" cy="16" r="12" stroke={dm ? PROGRESS_RING.bar.dark : PROGRESS_RING.bar.light} strokeWidth="3" fill="none"
                           strokeDasharray={`${Math.min(f.attempts, ATTEMPT_GOAL) * (ringCircumference / ATTEMPT_GOAL)} ${ringCircumference}`}
                           className="transition-all duration-300"
                         />
                       </svg>
-                      <span className={`absolute inset-0 flex items-center justify-center text-xs font-medium ${dm ? 'text-gray-300' : ''}`}>{f.attempts}</span>
+                      <span className={`absolute inset-0 flex items-center justify-center text-xs font-medium ${dm ? 'text-stone-300' : ''}`}>{f.attempts}</span>
                     </div>
-                    <span className="text-xs text-gray-500">/ {ATTEMPT_GOAL}</span>
+                    <span className="text-xs text-stone-500">/ {ATTEMPT_GOAL}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-500">Start trying foods in &quot;Trying Now&quot;</p>
+              <p className="text-xs text-stone-500">Start trying foods in &quot;Trying Now&quot;</p>
             )}
           </div>
         </div>
