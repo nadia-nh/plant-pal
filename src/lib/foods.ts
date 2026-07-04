@@ -3016,6 +3016,10 @@ export const foodSuggestions: FoodSuggestion[] = [
     easyMeals: ['Kimchi fried rice', 'Kimchi pancakes', 'Kimchi and tofu soup']
   }
 ]
+function containsCI(list: string[], name: string): boolean {
+  return list.some(f => f.toLowerCase() === name.toLowerCase())
+}
+
 export function getSuggestionsForFood(foodName: string): FoodSuggestion | undefined {
   return foodSuggestions.find(s =>
     s.name.toLowerCase() === foodName.toLowerCase()
@@ -3030,10 +3034,8 @@ export function getParentSuggestion(foodName: string): FoodSuggestion | undefine
 
 export function getSimilarFoods(foods: string[]): string[] {
   return foodSuggestions
-    .filter(s => !foods.some(f => f.toLowerCase() === s.name.toLowerCase()))
-    .filter(s => s.similarTo.some(similar => 
-      foods.some(f => f.toLowerCase() === similar.toLowerCase())
-    ))
+    .filter(s => !containsCI(foods, s.name))
+    .filter(s => s.similarTo.some(similar => containsCI(foods, similar)))
     .slice(0, 5)
     .map(s => s.name)
 }
@@ -3041,23 +3043,20 @@ export function getSimilarFoods(foods: string[]): string[] {
 export function getSimilarFoodsFallback(foods: string[], allFoods: string[]): string[] {
   // First try popular ingredients not yet tried
   const popularIngredients = ['Tofu', 'Chickpeas', 'Lentils', 'Sweet Potato', 'Mushrooms', 'Quinoa', 'Oats', 'Cauliflower', 'Spinach', 'Broccoli']
-  const available = popularIngredients.filter(p => 
-    !foods.some(f => f.toLowerCase() === p.toLowerCase()) &&
-    allFoods.some(a => a.toLowerCase() === p.toLowerCase())
+  const available = popularIngredients.filter(p =>
+    !containsCI(foods, p) && containsCI(allFoods, p)
   )
   if (available.length > 0) return available.slice(0, 5)
-  
+
   // Then try most versatile (foods with 4+ cooking methods)
   const versatile = foodSuggestions
     .filter(s => s.cookingMethods.length >= 4)
-    .filter(s => !foods.some(f => f.toLowerCase() === s.name.toLowerCase()))
+    .filter(s => !containsCI(foods, s.name))
     .map(s => s.name)
   if (versatile.length > 0) return versatile.slice(0, 5)
-  
+
   // Random fallback
-  const remaining = allFoods.filter(a => 
-    !foods.some(f => f.toLowerCase() === a.toLowerCase())
-  )
+  const remaining = allFoods.filter(a => !containsCI(foods, a))
   return remaining.sort(() => Math.random() - 0.5).slice(0, 5)
 }
 
@@ -3066,8 +3065,7 @@ export function getAllSuggestedFoods(): string[] {
 }
 
 export function getFoodType(name: string): FoodType {
-  const match = foodSuggestions.find(s => s.name.toLowerCase() === name.toLowerCase())
-  return match?.foodType ?? 'other'
+  return getSuggestionsForFood(name)?.foodType ?? 'other'
 }
 
 const GLUTEN_PATTERNS = ['wheat', 'barley', 'rye', 'spelt', 'seitan', 'pasta', 'bread', 'farro', 'couscous', 'bulgur', 'kamut', 'triticale']
@@ -3080,7 +3078,7 @@ export function getTagsForFood(name: string): DietaryTag[] {
   if (!GLUTEN_PATTERNS.some(p => lower.includes(p))) tags.push('gluten-free')
   if (!NUT_PATTERNS.some(p => lower.includes(p)))    tags.push('nut-free')
   if (!SOY_PATTERNS.some(p => lower.includes(p)))    tags.push('soy-free')
-  const food = foodSuggestions.find(s => s.name.toLowerCase() === lower)
+  const food = getSuggestionsForFood(name)
   if (food?.foodType === 'vegetable') {
     tags.push('raw-friendly')
     tags.push('oil-free')
