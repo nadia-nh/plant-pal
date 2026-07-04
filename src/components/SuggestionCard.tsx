@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
+import Image from 'next/image'
 import { FoodCategory } from '@/lib/types'
 import { FOOD_TYPE_CONFIG, SWIPE_ADD_THRESHOLD, SWIPE_DETECT_THRESHOLD } from '@/lib/constants'
 import { getSuggestionsForFood, getParentSuggestion } from '@/lib/foods'
@@ -174,11 +175,13 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
         >
           <div className={`relative w-full flex-1 flex items-center justify-center overflow-hidden ${dm ? 'bg-stone-700' : 'bg-stone-100'}`}>
             {imgFallback !== 'emoji'
-              ? <img
+              ? <Image
                   key={`${currentSuggestion}-${imgFallback}`}
                   src={imgSrc}
                   alt={currentSuggestion}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 448px"
+                  className="object-cover"
                   onError={handleImageError}
                 />
               : <span className="text-7xl">🍽️</span>

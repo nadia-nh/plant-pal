@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import Image from 'next/image'
 import { recipes } from '@/lib/recipes'
 
 interface RecipeBrowserProps {
@@ -7,6 +9,20 @@ interface RecipeBrowserProps {
   recipeFilter: string
   onFilterChange: (cat: string) => void
   barriers?: string[]
+}
+
+function RecipeImage({ src, alt }: { src: string; alt: string }) {
+  const [errored, setErrored] = useState(false)
+  return (
+    <Image
+      src={errored || !src ? '/placeholder-vegetable.svg' : src}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+      className="object-cover group-hover:scale-105 transition-transform duration-300"
+      onError={() => setErrored(true)}
+    />
+  )
 }
 
 export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers = [] }: RecipeBrowserProps) {
@@ -46,12 +62,7 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers
             rel="noopener noreferrer"
             className="relative overflow-hidden rounded-xl shadow hover:shadow-lg transition-shadow block group aspect-[4/3]"
           >
-            <img
-              src={recipe.image || '/placeholder-vegetable.svg'}
-              alt={recipe.title}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              onError={e => { (e.target as HTMLImageElement).src = '/placeholder-vegetable.svg' }}
-            />
+            <RecipeImage src={recipe.image} alt={recipe.title} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <span className="absolute top-2 left-2 inline-flex items-center bg-green-900/80 text-white text-[10px] px-2 py-1 rounded-full font-medium leading-none">
               {recipe.source}
