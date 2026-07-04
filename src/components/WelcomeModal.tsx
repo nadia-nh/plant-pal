@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { FoodType, DietaryTag } from '@/lib/types'
+import { ModalShell } from './ModalShell'
 
 export interface OnboardingFood {
   name: string
@@ -63,7 +64,6 @@ interface WelcomeModalProps {
 }
 
 export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
-  const dialogRef = useRef<HTMLDivElement>(null)
   const [step, setStep] = useState(0)
   const [selectedFoods, setSelectedFoods] = useState<string[]>([])
   const [selectedBarriers, setSelectedBarriers] = useState<string[]>([])
@@ -71,15 +71,12 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
 
   useEffect(() => {
     if (open) {
-      dialogRef.current?.focus()
       setStep(0)
       setSelectedFoods([])
       setSelectedBarriers([])
       setSelectedDietary([])
     }
   }, [open])
-
-  if (!open) return null
 
   const toggleFood = (name: string) => {
     setSelectedFoods(prev => {
@@ -101,18 +98,7 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onKeyDown={e => { if (e.key === 'Escape' && step >= 2) onSkip() }}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="welcome-modal-title"
-        tabIndex={-1}
-        className="bg-white rounded-2xl p-6 max-w-md w-full focus:outline-none overflow-y-auto max-h-[90vh]"
-      >
+    <ModalShell open={open} titleId="welcome-modal-title" maxWidth="md" scrollable="90vh" onEscape={() => { if (step >= 2) onSkip() }}>
         {/* Step progress dots (steps 1–3 only) */}
         {step > 0 && (
           <div className="flex justify-center gap-1.5 mb-5">
@@ -304,7 +290,6 @@ export function WelcomeModal({ open, onComplete, onSkip }: WelcomeModalProps) {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </ModalShell>
   )
 }

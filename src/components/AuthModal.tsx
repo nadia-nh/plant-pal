@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import type { User } from '@supabase/supabase-js'
+import { ModalShell } from './ModalShell'
 
 interface AuthModalProps {
   open: boolean
@@ -15,7 +16,6 @@ interface AuthModalProps {
 
 export function AuthModal({ open, user, darkMode, linkExpired, onClose, onSignIn, onSignOut }: AuthModalProps) {
   const dm = darkMode
-  const dialogRef = useRef<HTMLDivElement>(null)
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -23,14 +23,13 @@ export function AuthModal({ open, user, darkMode, linkExpired, onClose, onSignIn
 
   useEffect(() => {
     if (open) {
-      dialogRef.current?.focus()
       setSent(false)
       setEmail('')
       setError('')
     }
   }, [open])
 
-  if (!open) return null
+  const emailInputClass = `w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 transition-colors ${dm ? 'bg-stone-700 border-stone-600 text-stone-200 placeholder-stone-500 focus:ring-green-500/40' : 'bg-white border-stone-300 text-stone-800 placeholder-stone-400 focus:ring-green-700/40'}`
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,20 +52,7 @@ export function AuthModal({ open, user, darkMode, linkExpired, onClose, onSignIn
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-      onKeyDown={e => { if (e.key === 'Escape') onClose() }}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="auth-modal-title"
-        tabIndex={-1}
-        className={`${dm ? 'bg-stone-800' : 'bg-white'} rounded-2xl p-6 max-w-sm w-full focus:outline-none`}
-        onClick={e => e.stopPropagation()}
-      >
+    <ModalShell open={open} titleId="auth-modal-title" darkMode={dm} onBackdropClick={onClose} onEscape={onClose}>
         <div className="flex justify-between items-center mb-5">
           <h3 id="auth-modal-title" className={`font-semibold text-lg ${dm ? 'text-green-300' : 'text-green-900'}`}>
             {user ? 'Your account' : 'Sign in'}
@@ -112,7 +98,7 @@ export function AuthModal({ open, user, darkMode, linkExpired, onClose, onSignIn
                   autoComplete="email"
                   autoFocus
                   required
-                  className={`w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 transition-colors ${dm ? 'bg-stone-700 border-stone-600 text-stone-200 placeholder-stone-500 focus:ring-green-500/40' : 'bg-white border-stone-300 text-stone-800 placeholder-stone-400 focus:ring-green-700/40'}`}
+                  className={emailInputClass}
                 />
               </div>
               {error && <p className="text-xs text-red-500">{error}</p>}
@@ -158,7 +144,7 @@ export function AuthModal({ open, user, darkMode, linkExpired, onClose, onSignIn
                 placeholder="you@example.com"
                 autoComplete="email"
                 required
-                className={`w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 transition-colors ${dm ? 'bg-stone-700 border-stone-600 text-stone-200 placeholder-stone-500 focus:ring-green-500/40' : 'bg-white border-stone-300 text-stone-800 placeholder-stone-400 focus:ring-green-700/40'}`}
+                className={emailInputClass}
               />
             </div>
             {error && (
@@ -176,7 +162,6 @@ export function AuthModal({ open, user, darkMode, linkExpired, onClose, onSignIn
             </p>
           </form>
         )}
-      </div>
-    </div>
+    </ModalShell>
   )
 }

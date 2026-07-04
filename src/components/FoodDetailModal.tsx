@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { Heart, Sprout, Sparkles, Ban } from 'lucide-react'
 import { Food, FoodCategory, Attempt } from '@/lib/types'
 import { CATEGORIES } from '@/lib/constants'
 import { getSuggestionsForFood } from '@/lib/foods'
+import { ModalShell } from './ModalShell'
 
 const CATEGORY_META: Record<FoodCategory, { label: string; Icon: typeof Heart }> = {
   love:      { label: 'Loved',     Icon: Heart },
@@ -23,25 +23,13 @@ interface FoodDetailModalProps {
 }
 
 export function FoodDetailModal({ food, darkMode, onClose, onMove, onEditAttempt, onDeleteAttempt }: FoodDetailModalProps) {
-  const dialogRef = useRef<HTMLDivElement>(null)
   const dm = darkMode
-
-  useEffect(() => {
-    if (food) dialogRef.current?.focus()
-  }, [food])
-
-  if (!food) return null
-
-  const suggestion = getSuggestionsForFood(food.name)
+  const suggestion = food ? getSuggestionsForFood(food.name) : undefined
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 p-4" onClick={onClose}
-      onKeyDown={e => { if (e.key === 'Escape') onClose() }}
-    >
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="food-detail-title" tabIndex={-1}
-        className={`rounded-2xl p-4 max-w-sm w-full max-h-[80vh] overflow-y-auto focus:outline-none ${dm ? 'bg-stone-800' : 'bg-white'}`}
-        onClick={e => e.stopPropagation()}
-      >
+    <ModalShell open={!!food} titleId="food-detail-title" darkMode={dm} padding="sm" scrollable="80vh" zIndex={40} onBackdropClick={onClose} onEscape={onClose}>
+      {food && (
+        <>
         <div className="flex justify-between items-start mb-4">
           <h3 id="food-detail-title" className={`text-lg font-semibold ${dm ? 'text-stone-200' : 'text-stone-800'}`}>{food.name}</h3>
           <div className="flex gap-1">
@@ -136,7 +124,8 @@ export function FoodDetailModal({ food, darkMode, onClose, onMove, onEditAttempt
           </>
         )}
         <button onClick={onClose} className={`w-full py-2 rounded-xl ${dm ? 'bg-stone-700 text-stone-300' : 'bg-stone-100 text-stone-600'}`}>Close</button>
-      </div>
-    </div>
+        </>
+      )}
+    </ModalShell>
   )
 }
