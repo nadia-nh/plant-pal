@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Food, FoodCategory } from '@/lib/types'
 import { ATTEMPT_GOAL, DRAG_CLICK_THRESHOLD, PROGRESS_RING } from '@/lib/constants'
+import { surface, inputField, dropdownItem } from '@/lib/theme'
 
 interface TryingNowProps {
   exploringFoods: Food[]
@@ -128,7 +129,7 @@ export function TryingNow({ exploringFoods, allFoodNames, darkMode, onAddFood, o
           aria-haspopup="listbox"
           aria-autocomplete="list"
           aria-controls="trying-now-autocomplete"
-          className={`w-full px-3 py-2 text-sm border rounded-2xl focus:outline-none focus:ring-1 shadow-sm transition-all ${dm ? 'bg-stone-800 border-stone-600 text-stone-200 placeholder-stone-500 focus:border-green-500/50 focus:ring-green-500/30' : 'bg-white border-stone-200 text-stone-800 placeholder-stone-400 focus:border-green-700/50 focus:ring-green-700/30'}`}
+          className={`w-full px-3 py-2 text-sm border rounded-2xl focus:outline-none focus:ring-1 shadow-sm transition-all ${inputField(dm)}`}
           onChange={e => {
             setInput(e.target.value)
             setShowAutocomplete(e.target.value.length > 0)
@@ -145,11 +146,11 @@ export function TryingNow({ exploringFoods, allFoodNames, darkMode, onAddFood, o
           }}
         />
         {showAutocomplete && filtered.length > 0 && (
-          <ul id="trying-now-autocomplete" role="listbox" aria-label="Food suggestions" className={`absolute z-20 w-full border rounded-xl shadow-lg max-h-36 overflow-y-auto bottom-full mb-1 list-none p-0 m-0 ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}>
+          <ul id="trying-now-autocomplete" role="listbox" aria-label="Food suggestions" className={`absolute z-20 w-full border rounded-xl shadow-lg max-h-36 overflow-y-auto bottom-full mb-1 list-none p-0 m-0 ${surface(dm)}`}>
             {filtered.map(name => (
               <li key={name} role="option" aria-selected={false}>
                 <button
-                  className={`w-full text-left px-3 py-1.5 text-sm focus:outline-none transition-colors ${dm ? 'text-stone-200 hover:bg-stone-700 focus:bg-stone-700' : 'text-stone-700 hover:bg-stone-50 focus:bg-stone-50'}`}
+                  className={`w-full text-left px-3 py-1.5 text-sm focus:outline-none transition-colors ${dropdownItem(dm)}`}
                   onMouseDown={e => e.preventDefault()}
                   onClick={() => {
                     onAddFood(name, 'exploring')

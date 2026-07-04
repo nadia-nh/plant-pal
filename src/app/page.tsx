@@ -6,6 +6,7 @@ import { Leaf, Compass, ChefHat, Moon, Sun, Download, Upload, BarChart3, User, L
 import { Food, FoodCategory, Attempt, DietaryTag } from '@/lib/types'
 import { getSimilarFoods, getSimilarFoodsFallback, getAllSuggestedFoods, getFoodType, getTagsForFood, getSuggestionsForFood } from '@/lib/foods'
 import { ATTEMPT_GOAL } from '@/lib/constants'
+import { surface, inputField, dropdownItem } from '@/lib/theme'
 import { useFoodsStorage } from '@/hooks/useFoodsStorage'
 import { useDismissedSuggestions } from '@/hooks/useDismissedSuggestions'
 import { useAuth } from '@/hooks/useAuth'
@@ -301,26 +302,26 @@ function Home() {
             {showOptionsMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowOptionsMenu(false)} />
-                <div className={`absolute right-0 top-full mt-1 rounded-xl shadow-xl z-50 py-1 min-w-40 border ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}>
-                  <button onClick={() => { setDarkMode(!dm); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
+                <div className={`absolute right-0 top-full mt-1 rounded-xl shadow-xl z-50 py-1 min-w-40 border ${surface(dm)}`}>
+                  <button onClick={() => { setDarkMode(!dm); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dropdownItem(dm)}`}>
                     {dm ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
                     {dm ? 'Light mode' : 'Dark mode'}
                   </button>
-                  <button onClick={() => { exportData(); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
+                  <button onClick={() => { exportData(); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dropdownItem(dm)}`}>
                     <Download className="w-4 h-4 shrink-0" />
                     Export backup
                   </button>
-                  <label className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 cursor-pointer ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
+                  <label className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 cursor-pointer ${dropdownItem(dm)}`}>
                     <Upload className="w-4 h-4 shrink-0" />
                     Import backup
                     <input ref={importRef} type="file" accept="application/json" className="sr-only" onChange={e => { importData(e); setShowOptionsMenu(false) }} />
                   </label>
-                  <button onClick={() => { setShowProgress(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
+                  <button onClick={() => { setShowProgress(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dropdownItem(dm)}`}>
                     <BarChart3 className="w-4 h-4 shrink-0" />
                     Stats
                   </button>
                   <div className={`border-t my-1 ${dm ? 'border-stone-700' : 'border-stone-200'}`} />
-                  <button onClick={() => { setShowAuthModal(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dm ? 'text-stone-300 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}>
+                  <button onClick={() => { setShowAuthModal(true); setShowOptionsMenu(false) }} className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 ${dropdownItem(dm)}`}>
                     {user ? <User className="w-4 h-4 shrink-0" /> : <LogIn className="w-4 h-4 shrink-0" />}
                     {user ? 'Account' : 'Sign in / Sync'}
                   </button>
@@ -335,7 +336,7 @@ function Home() {
             value={searchQuery}
             placeholder="Search your foods…"
             aria-label="Search your foods"
-            className={`w-full px-4 py-2 text-sm rounded-2xl border focus:outline-none focus:ring-1 transition-colors ${dm ? 'bg-stone-800 border-stone-600 text-stone-200 placeholder-stone-500 focus:border-green-500/50 focus:ring-green-500/30' : 'bg-white border-stone-200 text-stone-800 placeholder-stone-400 focus:border-green-700/50 focus:ring-green-700/30'}`}
+            className={`w-full px-4 py-2 text-sm rounded-2xl border focus:outline-none focus:ring-1 transition-colors ${inputField(dm)}`}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Escape') setSearchQuery('') }}
           />
@@ -344,11 +345,11 @@ function Home() {
           )}
         </div>
         {searchResults.length > 0 && (
-          <ul className={`mt-1 max-w-sm mx-auto rounded-xl border shadow-lg overflow-hidden relative z-10 ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}>
+          <ul className={`mt-1 max-w-sm mx-auto rounded-xl border shadow-lg overflow-hidden relative z-10 ${surface(dm)}`}>
             {searchResults.map(f => (
               <li key={f.id}>
                 <button
-                  className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${dm ? 'text-stone-200 hover:bg-stone-700' : 'text-stone-700 hover:bg-stone-50'}`}
+                  className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${dropdownItem(dm)}`}
                   onClick={() => { setSelectedFood(f); setSearchQuery('') }}
                 >
                   <span>{f.name}</span>

@@ -29,6 +29,7 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers
   const dm = darkMode
   const recipeCategories = ['all', ...Array.from(new Set(recipes.map(r => r.category)))]
   const showQuickHint = barriers.some(b => ['time', 'cost', 'overwhelm'].includes(b))
+  const chipBase = 'inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs'
 
   return (
     <section className="max-w-6xl mx-auto px-4 pb-8">
@@ -38,7 +39,7 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers
       <p className={`text-sm mb-4 ${dm ? 'text-stone-500' : 'text-stone-400'}`}>{recipes.length} plant-based recipes</p>
       <div className="flex flex-wrap items-center gap-1.5 mb-6">
         <button onClick={() => onFilterChange('quick')}
-          className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs font-medium ${recipeFilter === 'quick' ? 'bg-amber-700 text-white' : dm ? 'bg-amber-900/40 text-amber-300 hover:bg-amber-900/60' : 'bg-amber-100/70 text-amber-800 hover:bg-amber-100'}`}
+          className={`${chipBase} font-medium ${recipeFilter === 'quick' ? 'bg-amber-700 text-white' : dm ? 'bg-amber-900/40 text-amber-300 hover:bg-amber-900/60' : 'bg-amber-100/70 text-amber-800 hover:bg-amber-100'}`}
         >
           ⚡ Quick &amp; easy
         </button>
@@ -47,7 +48,7 @@ export function RecipeBrowser({ darkMode, recipeFilter, onFilterChange, barriers
         )}
         {recipeCategories.map(cat => (
           <button key={cat} onClick={() => onFilterChange(cat)}
-            className={`inline-flex items-center leading-none px-2.5 py-1 rounded-full text-xs ${recipeFilter === cat ? 'bg-green-800 text-white' : dm ? 'bg-stone-800 text-stone-300 hover:bg-stone-700' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}
+            className={`${chipBase} ${recipeFilter === cat ? 'bg-green-800 text-white' : dm ? 'bg-stone-800 text-stone-300 hover:bg-stone-700' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}
           >
             {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
           </button>

@@ -5,6 +5,7 @@ import { Food, FoodCategory, FoodType } from '@/lib/types'
 import { getFoodType } from '@/lib/foods'
 import { STORAGE_KEY } from '@/lib/constants'
 import * as db from '@/lib/supabase/db'
+import { useLatestRef } from './useLatestRef'
 
 const defaultFoods: Food[] = [
   { id: '1', name: 'Rice',    category: 'love', foodType: 'grain',     attempts: 10, lastAttempted: '2024-01-15', notes: '', methodUsed: '', attemptHistory: [] },
@@ -44,10 +45,8 @@ function loadLocalFoods(): Food[] | null {
 export function useFoodsStorage(userId: string | null | undefined, onSyncError?: () => void) {
   const [foods, setFoods] = useState<Food[]>([])
   const initializedRef = useRef(false)
-  const foodsRef = useRef<Food[]>(foods)
-  foodsRef.current = foods
-  const onSyncErrorRef = useRef(onSyncError)
-  onSyncErrorRef.current = onSyncError
+  const foodsRef = useLatestRef(foods)
+  const onSyncErrorRef = useLatestRef(onSyncError)
 
   useEffect(() => {
     if (userId === undefined) return
@@ -104,7 +103,7 @@ export function useFoodsStorage(userId: string | null | undefined, onSyncError?:
     } else if (userId !== undefined) {
       db.saveFoods(userId, foods).catch(() => { console.error('sync failed'); onSyncErrorRef.current?.() })
     }
-  }, [foods, userId])
+  }, [foods, userId, onSyncErrorRef])
 
   return [foods, setFoods] as const
 }

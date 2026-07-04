@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Food, Attempt } from '@/lib/types'
 import { getSuggestionsForFood } from '@/lib/foods'
+import { inputField } from '@/lib/theme'
+import { ModalShell } from './ModalShell'
 
 interface AttemptModalProps {
   food: Food | null
@@ -18,11 +20,6 @@ export function AttemptModal({ food, darkMode, editingAttempt, onClose, onSubmit
   const [method, setMethod] = useState('')
   const [liked, setLiked] = useState<boolean | null>(null)
   const [notes, setNotes] = useState('')
-  const dialogRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (food) dialogRef.current?.focus()
-  }, [food])
 
   useEffect(() => {
     if (food) {
@@ -39,9 +36,8 @@ export function AttemptModal({ food, darkMode, editingAttempt, onClose, onSubmit
     }
   }, [food, editingAttempt])
 
-  if (!food) return null
-
   const handleSubmit = () => {
+    if (!food) return
     if (editingAttempt) {
       onSaveEdit?.(food.id, editingAttempt.id, { method, liked, notes })
       return
@@ -57,16 +53,13 @@ export function AttemptModal({ food, darkMode, editingAttempt, onClose, onSubmit
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onKeyDown={e => { if (e.key === 'Escape') onClose() }}
-    >
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="attempt-modal-title" tabIndex={-1}
-        className={`rounded-2xl p-4 max-w-sm w-full focus:outline-none ${dm ? 'bg-stone-800' : 'bg-white'}`}
-      >
+    <ModalShell open={!!food} titleId="attempt-modal-title" darkMode={dm} padding="sm" onEscape={onClose}>
+      {food && (
+        <>
         <h3 id="attempt-modal-title" className={`font-semibold text-lg mb-4 ${dm ? 'text-stone-200' : 'text-stone-800'}`}>{editingAttempt ? 'Edit attempt' : 'Log attempt'}: {food.name}</h3>
         <div className="mb-3">
           <label htmlFor="attempt-method" className={`block text-sm font-medium mb-1 ${dm ? 'text-stone-300' : 'text-stone-700'}`}>How did you try it?</label>
-          <input id="attempt-method" type="text" value={method} onChange={e => setMethod(e.target.value)} className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-1 ${dm ? 'bg-stone-800 border-stone-600 text-stone-200 focus:border-green-500/50 focus:ring-green-500/30' : 'bg-white border-stone-300 text-stone-800 focus:border-green-700/50 focus:ring-green-700/30'}`} />
+          <input id="attempt-method" type="text" value={method} onChange={e => setMethod(e.target.value)} className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-1 ${inputField(dm)}`} />
         </div>
         <div className="mb-3">
           <label className={`block text-sm font-medium mb-2 ${dm ? 'text-stone-300' : 'text-stone-700'}`}>Did you like it?</label>
@@ -78,13 +71,14 @@ export function AttemptModal({ food, darkMode, editingAttempt, onClose, onSubmit
         </div>
         <div className="mb-4">
           <label htmlFor="attempt-notes" className={`block text-sm font-medium mb-1 ${dm ? 'text-stone-300' : 'text-stone-700'}`}>Notes</label>
-          <textarea id="attempt-notes" value={notes} onChange={e => setNotes(e.target.value)} className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-1 ${dm ? 'bg-stone-800 border-stone-600 text-stone-200 focus:border-green-500/50 focus:ring-green-500/30' : 'bg-white border-stone-300 text-stone-800 focus:border-green-700/50 focus:ring-green-700/30'}`} rows={2} />
+          <textarea id="attempt-notes" value={notes} onChange={e => setNotes(e.target.value)} className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-1 ${inputField(dm)}`} rows={2} />
         </div>
         <div className="flex gap-2">
           <button onClick={onClose} className={`flex-1 py-2 border rounded-xl ${dm ? 'border-stone-600 text-stone-400' : 'border-stone-300 text-stone-600'}`}>Cancel</button>
           <button onClick={handleSubmit} className="flex-1 py-2 bg-green-800 hover:bg-green-900 text-white rounded-xl">{editingAttempt ? 'Save changes' : 'Save'}</button>
         </div>
-      </div>
-    </div>
+        </>
+      )}
+    </ModalShell>
   )
 }

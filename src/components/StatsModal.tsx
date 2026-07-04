@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { Food } from '@/lib/types'
 import { ATTEMPT_GOAL, PROGRESS_RING } from '@/lib/constants'
+import { ModalShell } from './ModalShell'
 
 interface StatsModalProps {
   open: boolean
@@ -13,15 +13,8 @@ interface StatsModalProps {
 
 export function StatsModal({ open, onClose, allFoods, darkMode }: StatsModalProps) {
   const dm = darkMode
-  const dialogRef = useRef<HTMLDivElement>(null)
   // Circumference of ring (r=12): 2π*12 ≈ 75.4
   const ringCircumference = 75.4
-
-  useEffect(() => {
-    if (open) dialogRef.current?.focus()
-  }, [open])
-
-  if (!open) return null
 
   const loveFoods     = allFoods.filter(f => f.category === 'love')
   const inProgressFoods = allFoods.filter(f => f.category === 'exploring' && f.attempts > 0)
@@ -37,11 +30,7 @@ export function StatsModal({ open, onClose, allFoods, darkMode }: StatsModalProp
   const topMethods = Object.entries(methodCounts).sort((a, b) => b[1] - a[1]).slice(0, 3)
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}
-      onKeyDown={e => { if (e.key === 'Escape') onClose() }}
-    >
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="stats-modal-title" tabIndex={-1}
-        className={`${dm ? 'bg-stone-800' : 'bg-white'} rounded-2xl p-6 max-w-sm w-full focus:outline-none`} onClick={e => e.stopPropagation()}>
+    <ModalShell open={open} titleId="stats-modal-title" darkMode={dm} onBackdropClick={onClose} onEscape={onClose}>
         <div className="flex justify-between items-center mb-5">
           <h3 id="stats-modal-title" className={`font-semibold text-lg ${dm ? 'text-green-300' : 'text-green-900'}`}>Your Food Journey</h3>
           <button onClick={onClose} className={`text-xl leading-none ${dm ? 'text-stone-500 hover:text-stone-300' : 'text-stone-400 hover:text-stone-600'}`}>✕</button>
@@ -108,7 +97,6 @@ export function StatsModal({ open, onClose, allFoods, darkMode }: StatsModalProp
             )}
           </div>
         </div>
-      </div>
-    </div>
+    </ModalShell>
   )
 }
