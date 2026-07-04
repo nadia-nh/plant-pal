@@ -7,6 +7,7 @@ import { FOOD_TYPE_CONFIG, SWIPE_ADD_THRESHOLD, SWIPE_DETECT_THRESHOLD } from '@
 import { getSuggestionsForFood, getParentSuggestion } from '@/lib/foods'
 import { getRecipeForFood } from '@/lib/recipes'
 import { FoodTypeIcon } from '@/lib/foodIcons'
+import { surface } from '@/lib/theme'
 
 const SPOONACULAR_SLUG_OVERRIDES: Record<string, string> = {
   'oats': 'rolled-oats',
@@ -64,7 +65,52 @@ function getFlickrFallbackUrl(foodName: string): string {
   return `https://loremflickr.com/500/500/${encodeURIComponent(clean)},food?lock=${lock}`
 }
 
-type ImgFallback = 'spoonacular' | 'fooddata' | 'parentimage' | 'flickr' | 'emoji'
+function getImageCandidates(foodName: string): string[] {
+  const own = getSuggestionsForFood(foodName)?.image
+  const parent = getParentSuggestion(foodName)?.image
+  return [
+    getIngredientImageUrl(foodName),
+    ...(own ? [own] : []),
+    ...(parent ? [parent] : []),
+    getFlickrFallbackUrl(foodName),
+  ]
+}
+
+function CardBadge({ side, tone, children }: { side: 'left' | 'right'; tone: 'green' | 'amber'; children: React.ReactNode }) {
+  return (
+    <span className={`absolute top-2 ${side === 'left' ? 'left-2' : 'right-2'} inline-flex items-center gap-1 text-white text-xs font-semibold px-2 py-1 rounded-full leading-none ${tone === 'green' ? 'bg-green-900/90' : 'bg-amber-700/90'}`}>
+      {children}
+    </span>
+  )
+}
+
+function SwipeOverlay({ tone, label }: { tone: 'add' | 'skip'; label: string }) {
+  return (
+    <div className={`absolute inset-0 rounded-2xl flex items-center justify-center pointer-events-none ${tone === 'add' ? 'bg-green-700/25' : 'bg-stone-500/30'}`}>
+      <span className="text-white font-bold text-2xl drop-shadow-lg">{label}</span>
+    </div>
+  )
+}
+
+function CircleActionButton({ onClick, symbol, caption, variant, dm }: {
+  onClick: () => void; symbol: string; caption: string; variant: 'primary' | 'secondary'; dm: boolean
+}) {
+  const base = 'w-14 h-14 rounded-full text-2xl flex items-center justify-center shadow transition-colors'
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <button
+        onClick={onClick}
+        className={variant === 'primary'
+          ? `${base} bg-green-800 text-white hover:bg-green-900`
+          : `${base} border ${dm ? 'bg-stone-800 border-stone-600 text-stone-400 hover:bg-stone-700' : 'bg-white border-stone-300 text-stone-500 hover:bg-stone-50'}`}
+      >{symbol}</button>
+      <span className={variant === 'primary'
+        ? `text-xs font-semibold ${dm ? 'text-green-300' : 'text-green-900'}`
+        : `text-xs ${dm ? 'text-stone-500' : 'text-stone-400'}`}
+      >{caption}</span>
+    </div>
+  )
+}
 
 interface SuggestionCardProps {
   currentSuggestion: string | undefined
@@ -79,11 +125,12 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
   const cardInnerRef = useRef<HTMLDivElement>(null)
   const cardDragRef = useRef<{ startX: number; deltaX: number } | null>(null)
   const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null)
-  const [imgFallback, setImgFallback] = useState<ImgFallback>('spoonacular')
+  const [fallbackIndex, setFallbackIndex] = useState(0)
   const dm = darkMode
+  const cardSurface = surface(dm)
 
   useEffect(() => {
-    setImgFallback('spoonacular')
+    setFallbackIndex(0)
   }, [currentSuggestion])
 
   const suggestionData = currentSuggestion ? getSuggestionsForFood(currentSuggestion) : undefined
@@ -91,7 +138,7 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
 
   if (!currentSuggestion) {
     return (
-      <div className={`${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'} rounded-2xl border shadow-lg p-8`}>
+      <div className={`${cardSurface} rounded-2xl border shadow-lg p-8`}>
         <p className={`text-center ${dm ? 'text-stone-400' : 'text-stone-500'}`}>No more suggestions right now — check back later!</p>
       </div>
     )
@@ -125,31 +172,11 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
     else if (deltaX < -SWIPE_ADD_THRESHOLD) onSkip()
   }
 
-  const handleImageError = () => {
-    if (imgFallback === 'spoonacular') {
-      const own = getSuggestionsForFood(currentSuggestion)?.image
-      const parent = getParentSuggestion(currentSuggestion)?.image
-      if (own) setImgFallback('fooddata')
-      else if (parent) setImgFallback('parentimage')
-      else setImgFallback('flickr')
-    } else if (imgFallback === 'fooddata') {
-      const parent = getParentSuggestion(currentSuggestion)?.image
-      if (parent) setImgFallback('parentimage')
-      else setImgFallback('flickr')
-    } else if (imgFallback === 'parentimage') {
-      setImgFallback('flickr')
-    } else {
-      setImgFallback('emoji')
-    }
-  }
+  const handleImageError = () => setFallbackIndex(i => i + 1)
 
-  const imgSrc = imgFallback === 'spoonacular'
-    ? getIngredientImageUrl(currentSuggestion)
-    : imgFallback === 'fooddata'
-    ? getSuggestionsForFood(currentSuggestion)?.image ?? ''
-    : imgFallback === 'parentimage'
-    ? getParentSuggestion(currentSuggestion)?.image ?? ''
-    : getFlickrFallbackUrl(currentSuggestion)
+  const imageCandidates = getImageCandidates(currentSuggestion)
+  const showEmoji = fallbackIndex >= imageCandidates.length
+  const imgSrc = imageCandidates[fallbackIndex]
 
   return (
     <>
@@ -170,13 +197,13 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
       >
         <div
           ref={cardInnerRef}
-          className={`absolute inset-0 rounded-2xl border shadow-lg overflow-hidden flex flex-col ${dm ? 'bg-stone-800 border-stone-700' : 'bg-white border-stone-200'}`}
+          className={`absolute inset-0 rounded-2xl border shadow-lg overflow-hidden flex flex-col ${cardSurface}`}
           style={{ willChange: 'transform' }}
         >
           <div className={`relative w-full flex-1 flex items-center justify-center overflow-hidden ${dm ? 'bg-stone-700' : 'bg-stone-100'}`}>
-            {imgFallback !== 'emoji'
+            {!showEmoji
               ? <Image
-                  key={`${currentSuggestion}-${imgFallback}`}
+                  key={`${currentSuggestion}-${fallbackIndex}`}
                   src={imgSrc}
                   alt={currentSuggestion}
                   fill
@@ -188,30 +215,22 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
             }
             <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
             {suggestionData && (
-              <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-green-900/90 text-white text-xs font-semibold px-2 py-1 rounded-full leading-none">
+              <CardBadge side="left" tone="green">
                 <FoodTypeIcon name={FOOD_TYPE_CONFIG[suggestionData.foodType].iconName} className="w-3.5 h-3.5" />{FOOD_TYPE_CONFIG[suggestionData.foodType].label}
-              </span>
+              </CardBadge>
             )}
             {hint && (
-              <span className="absolute top-2 right-2 inline-flex items-center gap-1 bg-amber-700/90 text-white text-xs font-semibold px-2 py-1 rounded-full leading-none">
+              <CardBadge side="right" tone="amber">
                 {hint}
-              </span>
+              </CardBadge>
             )}
             <span className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-xl drop-shadow-lg px-4">
               {currentSuggestion}
             </span>
           </div>
         </div>
-        {swipeDir === 'right' && (
-          <div className="absolute inset-0 bg-green-700/25 rounded-2xl flex items-center justify-center pointer-events-none">
-            <span className="text-white font-bold text-2xl drop-shadow-lg">✓ Try it!</span>
-          </div>
-        )}
-        {swipeDir === 'left' && (
-          <div className="absolute inset-0 bg-stone-500/30 rounded-2xl flex items-center justify-center pointer-events-none">
-            <span className="text-white font-bold text-2xl drop-shadow-lg">→ Skip</span>
-          </div>
-        )}
+        {swipeDir === 'right' && <SwipeOverlay tone="add" label="✓ Try it!" />}
+        {swipeDir === 'left' && <SwipeOverlay tone="skip" label="→ Skip" />}
       </div>
 
       {exampleRecipe && (
@@ -219,20 +238,8 @@ export function SuggestionCard({ currentSuggestion, darkMode, hint, onAdd, onSki
       )}
 
       <div className="flex items-center justify-around mt-6 px-8">
-        <div className="flex flex-col items-center gap-1">
-          <button
-            onClick={onSkip}
-            className={`w-14 h-14 rounded-full border text-2xl flex items-center justify-center shadow transition-colors ${dm ? 'bg-stone-800 border-stone-600 text-stone-400 hover:bg-stone-700' : 'bg-white border-stone-300 text-stone-500 hover:bg-stone-50'}`}
-          >→</button>
-          <span className={`text-xs ${dm ? 'text-stone-500' : 'text-stone-400'}`}>Skip</span>
-        </div>
-        <div className="flex flex-col items-center gap-1">
-          <button
-            onClick={() => onAdd('exploring')}
-            className="w-14 h-14 rounded-full bg-green-800 text-white text-2xl hover:bg-green-900 flex items-center justify-center shadow transition-colors"
-          >✓</button>
-          <span className={`text-xs font-semibold ${dm ? 'text-green-300' : 'text-green-900'}`}>Try it!</span>
-        </div>
+        <CircleActionButton onClick={onSkip} symbol="→" caption="Skip" variant="secondary" dm={dm} />
+        <CircleActionButton onClick={() => onAdd('exploring')} symbol="✓" caption="Try it!" variant="primary" dm={dm} />
       </div>
     </>
   )
